@@ -31,6 +31,9 @@ jobs:
       - docker/build:
           image: my_repo/my_image
           tag: latest
+      - docker/push:
+          image: my_repo/my_image
+          tag: latest
 
 workflows:
   build_test_and_docker:
