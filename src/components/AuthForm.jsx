@@ -142,7 +142,7 @@ export default function AuthForm() {
               exit="exit"
               className="bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-zinc-100"
             >
-              <div className="mb-8 text-center">
+              <div className="mb-8">
                 <h2 className="text-3xl font-light text-zinc-900 mb-2 tracking-wide">
                   {mode === 'signIn' ? 'Welcome Back' : mode === 'signUp' ? 'Create Account' : 'Reset Password'}
                 </h2>
@@ -257,7 +257,7 @@ export default function AuthForm() {
                 )}
               </form>
 
-              <div className="mt-8 text-center">
+              <div className="mt-8">
                 <p className="text-zinc-500 text-sm font-light">
                   {mode === 'signUp' ? 'Already have an account? ' : mode === 'forgotPassword' ? 'Remember your password? ' : "Don't have an account? "}
                   <button
