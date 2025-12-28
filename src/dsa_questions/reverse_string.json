@@ -1,0 +1,60 @@
+{
+    "id": 3,
+    "title": "Reverse String",
+    "difficulty": "Easy",
+    "description": "Write a function that reverses a string. The input string is given as an array of characters s.\n\nYou must do this by modifying the input array in-place with O(1) extra memory.",
+    "constraints": [
+        "1 <= s.length <= 10^5",
+        "s[i] is a printable ascii character."
+    ],
+    "examples": [
+        {
+            "input": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
+            "output": "[\"o\",\"l\",\"l\",\"e\",\"h\"]"
+        },
+        {
+            "input": "s = [\"H\",\"a\",\"n\",\"n\",\"a\",\"h\"]",
+            "output": "[\"h\",\"a\",\"n\",\"n\",\"a\",\"H\"]"
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "h,e,l,l,o",
+                "expectedOutput": "[\"o\", \"l\", \"l\", \"e\", \"h\"]"
+            },
+            {
+                "input": "H,a,n,n,a,h",
+                "expectedOutput": "[\"h\", \"a\", \"n\", \"n\", \"a\", \"H\"]"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "A,b,C,d",
+                "expectedOutput": "[\"d\", \"C\", \"b\", \"A\"]"
+            },
+            {
+                "input": "a",
+                "expectedOutput": "[\"a\"]"
+            },
+            {
+                "input": "1,2,3,4",
+                "expectedOutput": "[\"4\", \"3\", \"2\", \"1\"]"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def reverseString(self, s: List[str]) -> None:\n        \"\"\"\n        Do not return anything, modify s in-place instead.\n        \"\"\"\n        ",
+        "c": "void reverseString(char* s, int sSize) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    void reverseString(vector<char>& s) {\n        \n    }\n};",
+        "java": "class Solution {\n    public void reverseString(char[] s) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn reverse_string(s: &mut Vec<char>) {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    lines = sys.stdin.read().splitlines()\n    s = lines[0].split(',')\n    \n    sol = Solution()\n    sol.reverseString(s)\n    print(json.dumps(s))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char line[10000];\n    if (fgets(line, sizeof(line), stdin)) {\n        char s[2000];\n        int sSize = 0;\n        char *token = strtok(line, \",\\n\");\n        while (token != NULL) {\n            if (strlen(token) > 0) {\n                s[sSize++] = token[0];\n            }\n            token = strtok(NULL, \",\\n\");\n        }\n\n        reverseString(s, sSize);\n\n        printf(\"[\");\n        for (int i = 0; i < sSize; i++) {\n            printf(\"\\\"%c\\\"%s\", s[i], (i < sSize - 1) ? \", \" : \"\");\n        }\n        printf(\"]\\n\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n\nusing namespace std;\n\nint main() {\n    string line;\n    if (getline(cin, line)) {\n        vector<char> s;\n        stringstream ss(line);\n        string segment;\n        while(getline(ss, segment, ',')) {\n            if (!segment.empty()) s.push_back(segment[0]);\n        }\n\n        Solution sol;\n        sol.reverseString(s);\n\n        cout << \"[\";\n        for(size_t i = 0; i < s.size(); ++i) {\n            cout << \"\\\"\" << s[i] << \"\\\"\" << (i < s.size() - 1 ? \", \" : \"\");\n        }\n        cout << \"]\" << endl;\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String line = scanner.nextLine();\n            String[] parts = line.split(\",\");\n            char[] s = new char[parts.length];\n            for (int i = 0; i < parts.length; i++) {\n                s[i] = parts[i].charAt(0);\n            }\n            \n            Solution sol = new Solution();\n            sol.reverseString(s);\n            \n            System.out.print(\"[\");\n            for (int i = 0; i < s.length; i++) {\n                System.out.print(\"\\\"\" + s[i] + \"\\\"\");\n                if (i < s.length - 1) System.out.print(\", \");\n            }\n            System.out.print(\"]\");\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    \n    if let Some(Ok(line)) = lines.next() {\n        let mut s: Vec<char> = line.split(',')\n            .map(|x| x.chars().next().unwrap())\n            .collect();\n            \n        Solution::reverse_string(&mut s);\n        \n        print!(\"[\");\n        for (i, c) in s.iter().enumerate() {\n            if i > 0 { print!(\", \"); }\n            print!(\"\\\"{}\\\"\", c);\n        }\n        print!(\"]\");\n    }\n}"
+    }
+}

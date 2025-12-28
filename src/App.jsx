@@ -8,11 +8,12 @@ import {
 } from '@supabase/auth-helpers-react';
 import { supabase } from './lib/supabaseClient';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import PageTransition from './components/PageTransition';
 import AdminLayout from './components/AdminLayout';
 import { Toaster } from 'react-hot-toast';
+import LoadingScreen from './components/LoadingScreen';
 
 
 import Hero from './components/ui/Hero';
@@ -37,6 +38,7 @@ import PublicProfile from './components/PublicProfile';
 import UserPlayGround from './user/UserPlayGround';
 import UserMentorshipFormList from './user/UserMentorshipFormList';
 import UserCodingPlatform from './user/UserCodingPlatform';
+import ResumeAnalyzer from './components/ResumeAnalyzer';
 import AdminScannerMeetup from './admin/AdminScannerMeetup';
 import AdminMeetupList from './admin/AdminMeetupList';
 import AdminMeetup from './admin/AdminMeetup';
@@ -75,6 +77,7 @@ const AnimatedRoutes = () => {
         <Route path="/events" element={<PageTransition><UserEvents /></PageTransition>} />
         <Route path="/resource" element={<PageTransition><UserResource /></PageTransition>} />
         <Route path="/resume" element={<PageTransition><UserResumeBuilder /></PageTransition>} />
+        <Route path="/resume-analyzer" element={<PageTransition><ResumeAnalyzer /></PageTransition>} />
         <Route path="/mentorship" element={<PageTransition><UserMentorshipForm /></PageTransition>} />
         <Route path="/mentorship-form" element={<PageTransition><AdminMentorshipSubmission /></PageTransition>} />
         <Route path="/profile/:username" element={<PageTransition><PublicProfile /></PageTransition>} />
@@ -136,21 +139,19 @@ function Root() {
   if (!session) {
     return (
       <div className="flex flex-col min-h-screen">
-        <Router>
-          <Routes>
-            <Route path="/" element={<CodeSapiensHero />} />
-            <Route path="/auth" element={<AuthForm />} />
-            <Route path="/admin/hall-of-fame" element={<AdminHallOfFame />} />
-            <Route path="/admin/community-photos" element={<AdminCommunityPhotos />} />
-            <Route path="/admin/feedback" element={<AdminFeedbackList />} />
-            <Route path="/profile/:username" element={<PublicProfile />} />
+        <Routes>
+          <Route path="/" element={<CodeSapiensHero />} />
+          <Route path="/auth" element={<AuthForm />} />
+          <Route path="/admin/hall-of-fame" element={<AdminHallOfFame />} />
+          <Route path="/admin/community-photos" element={<AdminCommunityPhotos />} />
+          <Route path="/admin/feedback" element={<AdminFeedbackList />} />
+          <Route path="/profile/:username" element={<PublicProfile />} />
 
-            <Route path="/forgot-password" element={<ResetPassword />} />
-            <Route path="/reset-password" element={<ResetPasswordConfirm />} />
-            <Route path="/test-analytics" element={<AdminLayout><AnalyticsPage /></AdminLayout>} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Router>
+          <Route path="/forgot-password" element={<ResetPassword />} />
+          <Route path="/reset-password" element={<ResetPasswordConfirm />} />
+          <Route path="/test-analytics" element={<AdminLayout><AnalyticsPage /></AdminLayout>} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       </div>
     );
   }
@@ -159,20 +160,57 @@ function Root() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
-        <Router>
-          <NavBar />
-          <AnimatedRoutes />
-        </Router>
+        <NavBar />
+        <AnimatedRoutes />
       </main>
     </div>
   );
 }
 
+import { LoadingProvider, useAppLoading } from "./context/LoadingContext";
+
+// Root Component wrapped in LoadingProvider context consumer
+const RootWithLoading = () => {
+  const { isAppLoading, setIsAppLoading } = useAppLoading();
+
+  return (
+    <AnimatePresence mode="wait">
+      {isAppLoading && (
+        <LoadingScreen onComplete={() => setIsAppLoading(false)} />
+      )}
+
+      {/* iPhone Unlock Style Animation */}
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, filter: "blur(10px)" }}
+        animate={{
+          scale: isAppLoading ? 0.9 : 1,
+          opacity: isAppLoading ? 0 : 1,
+          filter: isAppLoading ? "blur(10px)" : "blur(0px)"
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 200,
+          damping: 25,
+          delay: 0.2 // Small delay to sync with loading screen exit
+        }}
+        style={{ width: '100%', minHeight: '100vh' }}
+        key="main-content" // Ensure animation triggers
+      >
+        <Root />
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 export default function App() {
   return (
     <SessionContextProvider supabaseClient={supabase}>
-      <Toaster position="top-center" />
-      <Root />
+      <LoadingProvider>
+        <Router>
+          <RootWithLoading />
+          <Toaster position="top-center" />
+        </Router>
+      </LoadingProvider>
     </SessionContextProvider>
   );
 }

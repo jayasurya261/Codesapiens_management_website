@@ -1,0 +1,67 @@
+{
+    "id": 1,
+    "title": "Two Sum",
+    "difficulty": "Easy",
+    "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.",
+    "constraints": [
+        "2 <= nums.length <= 10^4",
+        "-10^9 <= nums[i] <= 10^9",
+        "-10^9 <= target <= 10^9",
+        "Only one valid answer exists."
+    ],
+    "examples": [
+        {
+            "input": "nums = [2,7,11,15], target = 9",
+            "output": "[0,1]",
+            "explanation": "Because nums[0] + nums[1] == 9, we return [0, 1]."
+        },
+        {
+            "input": "nums = [3,2,4], target = 6",
+            "output": "[1,2]"
+        },
+        {
+            "input": "nums = [3,3], target = 6",
+            "output": "[0,1]"
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "2,7,11,15\n9",
+                "expectedOutput": "[0, 1]"
+            },
+            {
+                "input": "3,2,4\n6",
+                "expectedOutput": "[1, 2]"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "3,3\n6",
+                "expectedOutput": "[0, 1]"
+            },
+            {
+                "input": "1,2\n3",
+                "expectedOutput": "[0, 1]"
+            },
+            {
+                "input": "-1,-2,-3,-4,-5\n-8",
+                "expectedOutput": "[2, 4]"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def twoSum(self, nums: List[int], target: int) -> List[int]:\n        ",
+        "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* twoSum(int* nums, int numsSize, int target, int* returnSize) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};",
+        "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    lines = sys.stdin.read().splitlines()\n    nums = json.loads('[' + lines[0] + ']')\n    target = int(lines[1])\n    \n    sol = Solution()\n    result = sol.twoSum(nums, target)\n    print(json.dumps(result))",
+        "c": "\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint main() {\n    char line1[10000];\n    char line2[100];\n    if (fgets(line1, sizeof(line1), stdin) && fgets(line2, sizeof(line2), stdin)) {\n        int nums[1000];\n        int numsSize = 0;\n        char *token = strtok(line1, \",\\n\");\n        while (token != NULL) {\n            nums[numsSize++] = atoi(token);\n            token = strtok(NULL, \",\\n\");\n        }\n\n        int target = atoi(line2);\n        int returnSize;\n        int* result = twoSum(nums, numsSize, target, &returnSize);\n\n        printf(\"[\");\n        for (int i = 0; i < returnSize; i++) {\n            printf(\"%d%s\", result[i], (i < returnSize - 1) ? \", \" : \"\");\n        }\n        printf(\"]\\n\");\n        free(result);\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\n#include <vector>\n#include <sstream>\n#include <string>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    string line1, line2;\n    if (getline(cin, line1) && getline(cin, line2)) {\n        vector<int> nums;\n        stringstream ss(line1);\n        string segment;\n        while(getline(ss, segment, ',')) {\n            nums.push_back(stoi(segment));\n        }\n\n        int target = stoi(line2);\n\n        Solution sol;\n        vector<int> result = sol.twoSum(nums, target);\n\n        cout << \"[\";\n        for(size_t i = 0; i < result.size(); ++i) {\n            cout << result[i] << (i < result.size() - 1 ? \", \" : \"\");\n        }\n        cout << \"]\" << endl;\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.*;\nimport java.io.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextLine()) {\n            String line1 = scanner.nextLine();\n            String[] parts = line1.split(\",\");\n            int[] nums = new int[parts.length];\n            for (int i = 0; i < parts.length; i++) {\n                nums[i] = Integer.parseInt(parts[i].trim());\n            }\n            \n            if (scanner.hasNextLine()) {\n                int target = Integer.parseInt(scanner.nextLine().trim());\n                \n                Solution sol = new Solution();\n                int[] result = sol.twoSum(nums, target);\n                \n                System.out.print(\"[\");\n                for (int i = 0; i < result.length; i++) {\n                    System.out.print(result[i] + (i < result.length - 1 ? \", \" : \"\"));\n                }\n                System.out.print(\"]\");\n            }\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    \n    if let Some(Ok(line1)) = lines.next() {\n        let nums: Vec<i32> = line1.split(',')\n            .map(|s| s.trim().parse().unwrap())\n            .collect();\n            \n        if let Some(Ok(line2)) = lines.next() {\n            let target: i32 = line2.trim().parse().unwrap();\n            \n            let result = Solution::two_sum(nums, target);\n            \n            print!(\"[\");\n            for (i, num) in result.iter().enumerate() { // Fixed iteration logic for formatting\n                if i > 0 { print!(\", \"); }\n                print!(\"{}\", num);\n            }\n            print!(\"]\");\n        }\n    }\n}"
+    }
+}

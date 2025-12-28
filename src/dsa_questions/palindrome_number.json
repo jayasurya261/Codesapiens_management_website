@@ -1,0 +1,66 @@
+{
+    "id": 2,
+    "title": "Palindrome Number",
+    "difficulty": "Easy",
+    "description": "Given an integer x, return true if x is a palindrome, and false otherwise.",
+    "constraints": [
+        "-2^31 <= x <= 2^31 - 1"
+    ],
+    "examples": [
+        {
+            "input": "x = 121",
+            "output": "true",
+            "explanation": "121 reads as 121 from left to right and from right to left."
+        },
+        {
+            "input": "x = -121",
+            "output": "false",
+            "explanation": "From left to right, it reads -121. From right to left, it becomes 121-. Therefore it is not a palindrome."
+        },
+        {
+            "input": "x = 10",
+            "output": "false",
+            "explanation": "Reads 01 from right to left. Therefore it is not a palindrome."
+        }
+    ],
+    "testCases": {
+        "public": [
+            {
+                "input": "121",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "-121",
+                "expectedOutput": "false"
+            }
+        ],
+        "hidden": [
+            {
+                "input": "10",
+                "expectedOutput": "false"
+            },
+            {
+                "input": "0",
+                "expectedOutput": "true"
+            },
+            {
+                "input": "12321",
+                "expectedOutput": "true"
+            }
+        ]
+    },
+    "starterCode": {
+        "python": "class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        ",
+        "c": "bool isPalindrome(int x) {\n    \n}",
+        "cpp": "class Solution {\npublic:\n    bool isPalindrome(int x) {\n        \n    }\n};",
+        "java": "class Solution {\n    public boolean isPalindrome(int x) {\n        \n    }\n}",
+        "rust": "impl Solution {\n    pub fn is_palindrome(x: i32) -> bool {\n        \n    }\n}"
+    },
+    "driverCode": {
+        "python": "\nimport sys\nimport json\n\nif __name__ == '__main__':\n    lines = sys.stdin.read().splitlines()\n    x = int(lines[0])\n    \n    sol = Solution()\n    result = sol.isPalindrome(x)\n    print('true' if result else 'false')",
+        "c": "\n#include <stdio.h>\n#include <stdbool.h>\n\nint main() {\n    int x;\n    if (scanf(\"%d\", &x) == 1) {\n        bool result = isPalindrome(x);\n        printf(\"%s\\n\", result ? \"true\" : \"false\");\n    }\n    return 0;\n}",
+        "cpp": "\n#include <iostream>\nusing namespace std;\n\nint main() {\n    int x;\n    if (cin >> x) {\n        Solution sol;\n        bool result = sol.isPalindrome(x);\n        cout << (result ? \"true\" : \"false\") << endl;\n    }\n    return 0;\n}",
+        "java": "\nimport java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner scanner = new Scanner(System.in);\n        if (scanner.hasNextInt()) {\n            int x = scanner.nextInt();\n            Solution sol = new Solution();\n            boolean result = sol.isPalindrome(x);\n            System.out.print(result ? \"true\" : \"false\");\n        }\n    }\n}",
+        "rust": "\nuse std::io::{self, BufRead};\n\nfn main() {\n    let stdin = io::stdin();\n    let mut lines = stdin.lock().lines();\n    \n    if let Some(Ok(line)) = lines.next() {\n        let x: i32 = line.trim().parse().unwrap();\n        let result = Solution::is_palindrome(x);\n        print!(\"{}\", if result { \"true\" } else { \"false\" });\n    }\n}"
+    }
+}

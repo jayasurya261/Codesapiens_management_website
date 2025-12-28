@@ -1,6 +1,246 @@
 -- ================================================================
--- 1. Helper Function: Get User by Username (RPC)
+-- Supabase Application Seed (Reordered for Dependencies)
 -- ================================================================
+
+-- ================================================================
+-- 1. Extensions
+-- ================================================================
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- ================================================================
+-- 2. Helper Functions (No Dependencies)
+-- ================================================================
+CREATE OR REPLACE FUNCTION public.random_token(prefix text)
+RETURNS text LANGUAGE plpgsql STABLE AS $$
+BEGIN
+  RETURN prefix || '_' || substr(md5(gen_random_uuid()::text || clock_timestamp()::text),1,16);
+END;
+$$;
+
+-- ================================================================
+-- 3. Database Schema (Tables)
+-- ================================================================
+
+-- Users Table
+CREATE TABLE IF NOT EXISTS public.users (
+  uid text PRIMARY KEY, -- References auth.users(id)
+  display_name text,
+  email text UNIQUE,
+  phone_number text,
+  avatar text,
+  bio text,
+  college text,
+  github_url text,
+  linkedin_url text,
+  portfolio_url text,
+  skills text[],
+  role text DEFAULT 'student' CHECK (role = ANY (ARRAY['student','admin','mentor'])),
+  badges_earned integer DEFAULT 0,
+  points integer DEFAULT 0,
+  sessions_attended integer DEFAULT 0,
+  volunteering_hours integer DEFAULT 0,
+  admin_approved boolean DEFAULT false,
+  email_verified boolean DEFAULT false,
+  phone_verified boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  department text,
+  major text,
+  year integer,
+  resume_url text,
+  mentorship_request jsonb DEFAULT '[]'::jsonb,
+  username text UNIQUE,
+  is_public boolean DEFAULT false,
+  attended_meetups jsonb DEFAULT '[]'::jsonb,
+  last_feedback_at timestamptz -- Added from previous ADD COLUMN
+);
+
+-- Meetup Table
+CREATE TABLE IF NOT EXISTS public.meetup (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL CHECK (TRIM(BOTH FROM title) <> ''),
+  description text,
+  start_date_time timestamptz,
+  end_date_time timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  updated_by uuid,
+  created_by uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
+  venue text,
+  registration_start_time timestamptz,
+  registration_end_time timestamptz,
+  registration_open_until_meetup_end boolean DEFAULT false
+);
+
+-- Registrations Table
+CREATE TABLE IF NOT EXISTS public.registrations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  meetup_id uuid REFERENCES public.meetup(id) ON DELETE CASCADE,
+  user_name text,
+  user_email text,
+  token text UNIQUE DEFAULT public.random_token('tok'),
+  is_checked_in boolean DEFAULT false,
+  checked_in_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  user_id text REFERENCES public.users(uid)
+);
+
+-- Mentorship Programs Table
+CREATE TABLE IF NOT EXISTS public.mentorship_programs (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title text,
+  description text,
+  image_url text,
+  start_date timestamptz,
+  end_date timestamptz,
+  registration_open_date timestamptz,
+  registration_close_date timestamptz,
+  status text DEFAULT 'draft' CHECK (status = ANY (ARRAY['draft','published','archived'])),
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+-- Mentorship Weeks Table
+CREATE TABLE IF NOT EXISTS public.mentorship_weeks (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  program_id uuid,
+  week_number integer,
+  title text,
+  content jsonb,
+  submission_open_date timestamptz,
+  submission_close_date timestamptz,
+  is_submission_open boolean DEFAULT true,
+  created_at timestamptz DEFAULT now(),
+  FOREIGN KEY (program_id) REFERENCES public.mentorship_programs(id)
+);
+
+-- Mentorship Registrations Table
+CREATE TABLE IF NOT EXISTS public.mentorship_registrations (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id uuid,
+  program_id uuid,
+  status text DEFAULT 'pending' CHECK (status = ANY (ARRAY['pending','approved','rejected','completed'])),
+  answers jsonb,
+  created_at timestamptz DEFAULT now(),
+  team_id uuid,
+  role text DEFAULT 'member',
+  invitation_status text DEFAULT 'accepted',
+  FOREIGN KEY (program_id) REFERENCES public.mentorship_programs(id)
+);
+
+-- Mentorship Submissions Table
+CREATE TABLE IF NOT EXISTS public.mentorship_submissions (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  registration_id uuid,
+  week_id uuid,
+  user_id uuid,
+  content jsonb,
+  feedback text,
+  score integer,
+  status text DEFAULT 'submitted' CHECK (status = ANY (ARRAY['submitted','reviewed'])),
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  FOREIGN KEY (registration_id) REFERENCES public.mentorship_registrations(id)
+);
+
+-- Mentorship Teams Table
+CREATE TABLE IF NOT EXISTS public.mentorship_teams (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text,
+  leader_id uuid,
+  program_id uuid,
+  created_at timestamptz DEFAULT timezone('utc', now()),
+  FOREIGN KEY (leader_id) REFERENCES auth.users(id),
+  FOREIGN KEY (program_id) REFERENCES public.mentorship_programs(id)
+);
+
+-- Blogs Table
+CREATE TABLE IF NOT EXISTS public.blogs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title varchar,
+  slug varchar UNIQUE,
+  excerpt text,
+  content text,
+  cover_image text,
+  author_id text,
+  status varchar DEFAULT 'draft' CHECK (status::text = ANY (ARRAY['draft','published']::text[])),
+  published_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  FOREIGN KEY (author_id) REFERENCES public.users(uid)
+);
+
+-- Hall of Fame Table
+CREATE TABLE IF NOT EXISTS public.hall_of_fame (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  image_url text NOT NULL,
+  student_name text,
+  description text,
+  created_at timestamptz DEFAULT now(),
+  is_active boolean DEFAULT true
+);
+
+-- Community Photos Table
+CREATE TABLE IF NOT EXISTS public.community_photos (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  image_url text NOT NULL,
+  date text,
+  description text,
+  participants integer DEFAULT 0,
+  order_number integer DEFAULT 0,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Feedback Table
+CREATE TABLE IF NOT EXISTS public.feedback (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id text REFERENCES public.users(uid),
+  message text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+-- User Solved Problems Table
+CREATE TABLE IF NOT EXISTS public.user_solved_problems (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id text NOT NULL,
+  question_id integer NOT NULL,
+  solved_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_solved_problems_pkey PRIMARY KEY (id),
+  CONSTRAINT user_solved_problems_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(uid),
+  CONSTRAINT unique_user_question UNIQUE (user_id, question_id)
+);
+
+-- ================================================================
+-- 4. Indexes
+-- ================================================================
+CREATE INDEX IF NOT EXISTS idx_public_users_email ON public.users(email);
+CREATE INDEX IF NOT EXISTS idx_public_registrations_meetup ON public.registrations(meetup_id);
+
+-- ================================================================
+-- 5. Row-Level Security (RLS) Enable
+-- ================================================================
+ALTER TABLE IF EXISTS public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.meetup ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.registrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.mentorship_programs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.mentorship_weeks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.mentorship_registrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.mentorship_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.mentorship_teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.blogs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.hall_of_fame ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.community_photos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.user_solved_problems ENABLE ROW LEVEL SECURITY;
+
+-- ================================================================
+-- 6. Functions (Logic)
+-- ================================================================
+
+-- Function: Get User by Username
 CREATE OR REPLACE FUNCTION public.get_user_by_username(lookup_username text)
 RETURNS TABLE (uid text, username text)
 LANGUAGE plpgsql
@@ -14,10 +254,7 @@ BEGIN
 END;
 $$;
 
--- ================================================================
--- 2. Trigger Function: Handle New User Signup
---    (Copies auth.users data to public.users)
--- ================================================================
+-- Function: Handle New User (Trigger logic)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -59,15 +296,7 @@ BEGIN
 END;
 $$;
 
--- Trigger: Fires when a user is created in Supabase Auth
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- ================================================================
--- 3. Helper Function: Check if Current User is Admin
--- ================================================================
+-- Function: Is Admin
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
 LANGUAGE sql
@@ -81,15 +310,12 @@ AS $$
   );
 $$;
 
--- ================================================================
--- 4. Trigger Function: Prevent Role Changes
--- ================================================================
+-- Function: Prevent Role Change
 CREATE OR REPLACE FUNCTION public.prevent_role_change()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  -- If the role is changing, block it
   IF NEW.role IS DISTINCT FROM OLD.role THEN
     RAISE EXCEPTION 'You are not allowed to change the role column directly.';
   END IF;
@@ -97,15 +323,7 @@ BEGIN
 END;
 $$;
 
--- Trigger: Fires before update on public.users
-DROP TRIGGER IF EXISTS check_role_update ON public.users;
-CREATE TRIGGER check_role_update
-  BEFORE UPDATE ON public.users
-  FOR EACH ROW EXECUTE FUNCTION public.prevent_role_change();
-
--- ================================================================
--- 5. Trigger Function: Auto-update 'updated_at' timestamp
--- ================================================================
+-- Function: Handle Updated At (Generic)
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -116,19 +334,7 @@ BEGIN
 END;
 $$;
 
--- Trigger: Fires before update on public.users
-DROP TRIGGER IF EXISTS set_updated_at ON public.users;
-CREATE TRIGGER set_updated_at
-  BEFORE UPDATE ON public.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
-
-  ---------------------Trigger----------------------------
-
-  -- ==========================================
--- 1. Functions (Must exist for triggers to work)
--- ==========================================
-
--- Function for the blog trigger
+-- Function: Update Blog Updated At
 CREATE OR REPLACE FUNCTION public.update_blog_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
@@ -137,7 +343,7 @@ BEGIN
 END;
 $$;
 
--- Function for the generic/user trigger
+-- Function: Update User Updated At (alias)
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
@@ -146,209 +352,67 @@ BEGIN
 END;
 $$;
 
--- ==========================================
--- 2. Triggers
--- ==========================================
+-- Function: Broadcast Room Messages
+CREATE OR REPLACE FUNCTION public.room_messages_broadcast_trigger()
+RETURNS TRIGGER AS $$
+DECLARE
+  rec RECORD;
+BEGIN
+  rec := COALESCE(NEW, OLD);
+  PERFORM realtime.broadcast_changes(
+    'room:' || (rec.id)::text,
+    TG_OP,
+    TG_OP,
+    TG_TABLE_NAME,
+    TG_TABLE_SCHEMA,
+    NEW,
+    OLD
+  );
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger 1: For the 'blogs' table
+-- ================================================================
+-- 7. Triggers
+-- ================================================================
+
+-- Trigger: On Auth User Created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Trigger: Check Role Update
+DROP TRIGGER IF EXISTS check_role_update ON public.users;
+CREATE TRIGGER check_role_update
+  BEFORE UPDATE ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.prevent_role_change();
+
+-- Trigger: Set Updated At (Users)
+DROP TRIGGER IF EXISTS set_updated_at ON public.users;
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- Trigger: Handle Blog Updated At
 DROP TRIGGER IF EXISTS handle_blog_updated_at ON public.blogs;
 CREATE TRIGGER handle_blog_updated_at
   BEFORE UPDATE ON public.blogs
   FOR EACH ROW
   EXECUTE FUNCTION public.update_blog_updated_at();
 
--- Trigger 2: For the 'users' table (Replicating the second trigger)
+-- Trigger: Handle User Updated At (Second trigger on users)
 DROP TRIGGER IF EXISTS handle_user_updated_at ON public.users;
 CREATE TRIGGER handle_user_updated_at
   BEFORE UPDATE ON public.users
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
-  -----------------DB Schema-------------------------
-  -- ================================================================
--- Supabase Application Seed (Fixed Permissions)
+-- ================================================================
+-- 8. Policies
 -- ================================================================
 
--- =========================
--- 1) Extensions
--- =========================
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
--- =========================
--- 2) Helper functions
--- =========================
-CREATE OR REPLACE FUNCTION public.random_token(prefix text)
-RETURNS text LANGUAGE plpgsql STABLE AS $$
-BEGIN
-  RETURN prefix || '_' || substr(md5(gen_random_uuid()::text || clock_timestamp()::text),1,16);
-END;
-$$;
-
--- =========================
--- 3) Public Tables (Application Data)
--- =========================
-
-CREATE TABLE IF NOT EXISTS public.users (
-  uid text PRIMARY KEY, -- References auth.users(id)
-  display_name text,
-  email text UNIQUE,
-  phone_number text,
-  avatar text,
-  bio text,
-  college text,
-  github_url text,
-  linkedin_url text,
-  portfolio_url text,
-  skills text[],
-  role text DEFAULT 'student' CHECK (role = ANY (ARRAY['student','admin','mentor'])),
-  badges_earned integer DEFAULT 0,
-  points integer DEFAULT 0,
-  sessions_attended integer DEFAULT 0,
-  volunteering_hours integer DEFAULT 0,
-  admin_approved boolean DEFAULT false,
-  email_verified boolean DEFAULT false,
-  phone_verified boolean DEFAULT false,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now(),
-  department text,
-  major text,
-  year integer,
-  resume_url text,
-  mentorship_request jsonb DEFAULT '[]'::jsonb,
-  username text UNIQUE,
-  is_public boolean DEFAULT false,
-  attended_meetups jsonb DEFAULT '[]'::jsonb
-);
-
-CREATE TABLE IF NOT EXISTS public.meetup (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  title text NOT NULL CHECK (TRIM(BOTH FROM title) <> ''),
-  description text,
-  start_date_time timestamptz,
-  end_date_time timestamptz,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now(),
-  updated_by uuid,
-  created_by uuid DEFAULT '00000000-0000-0000-0000-000000000000'::uuid,
-  venue text,
-  registration_start_time timestamptz,
-  registration_end_time timestamptz,
-  registration_open_until_meetup_end boolean DEFAULT false
-);
-
-CREATE TABLE IF NOT EXISTS public.registrations (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  meetup_id uuid REFERENCES public.meetup(id) ON DELETE CASCADE,
-  user_name text,
-  user_email text,
-  token text UNIQUE DEFAULT public.random_token('tok'),
-  is_checked_in boolean DEFAULT false,
-  checked_in_at timestamptz,
-  created_at timestamptz DEFAULT now(),
-  user_id text REFERENCES public.users(uid)
-);
-
-CREATE TABLE IF NOT EXISTS public.mentorship_programs (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title text,
-  description text,
-  image_url text,
-  start_date timestamptz,
-  end_date timestamptz,
-  registration_open_date timestamptz,
-  registration_close_date timestamptz,
-  status text DEFAULT 'draft' CHECK (status = ANY (ARRAY['draft','published','archived'])),
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS public.mentorship_weeks (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  program_id uuid,
-  week_number integer,
-  title text,
-  content jsonb,
-  submission_open_date timestamptz,
-  submission_close_date timestamptz,
-  is_submission_open boolean DEFAULT true,
-  created_at timestamptz DEFAULT now(),
-  FOREIGN KEY (program_id) REFERENCES public.mentorship_programs(id)
-);
-
-CREATE TABLE IF NOT EXISTS public.mentorship_registrations (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id uuid,
-  program_id uuid,
-  status text DEFAULT 'pending' CHECK (status = ANY (ARRAY['pending','approved','rejected','completed'])),
-  answers jsonb,
-  created_at timestamptz DEFAULT now(),
-  team_id uuid,
-  role text DEFAULT 'member',
-  invitation_status text DEFAULT 'accepted',
-  FOREIGN KEY (program_id) REFERENCES public.mentorship_programs(id)
-);
-
-CREATE TABLE IF NOT EXISTS public.mentorship_submissions (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  registration_id uuid,
-  week_id uuid,
-  user_id uuid,
-  content jsonb,
-  feedback text,
-  score integer,
-  status text DEFAULT 'submitted' CHECK (status = ANY (ARRAY['submitted','reviewed'])),
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now(),
-  FOREIGN KEY (registration_id) REFERENCES public.mentorship_registrations(id)
-);
-
-CREATE TABLE IF NOT EXISTS public.mentorship_teams (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text,
-  leader_id uuid,
-  program_id uuid,
-  created_at timestamptz DEFAULT timezone('utc', now()),
-  FOREIGN KEY (leader_id) REFERENCES auth.users(id),
-  FOREIGN KEY (program_id) REFERENCES public.mentorship_programs(id)
-);
-
-CREATE TABLE IF NOT EXISTS public.blogs (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  title varchar,
-  slug varchar UNIQUE,
-  excerpt text,
-  content text,
-  cover_image text,
-  author_id text,
-  status varchar DEFAULT 'draft' CHECK (status::text = ANY (ARRAY['draft','published']::text[])),
-  published_at timestamptz,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now(),
-  FOREIGN KEY (author_id) REFERENCES public.users(uid)
-);
-
--- =========================
--- 4) Indexes
--- =========================
-CREATE INDEX IF NOT EXISTS idx_public_users_email ON public.users(email);
-CREATE INDEX IF NOT EXISTS idx_public_registrations_meetup ON public.registrations(meetup_id);
-
--- =========================
--- 5) Row-Level Security (RLS)
--- =========================
-
--- Enable RLS on YOUR public tables only
-ALTER TABLE IF EXISTS public.registrations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.meetup ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.mentorship_programs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.mentorship_weeks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.mentorship_registrations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.mentorship_submissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.mentorship_teams ENABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.blogs ENABLE ROW LEVEL SECURITY;
-
+-- Blogs Policies
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'blogs' AND policyname = 'blogs_select_published') THEN
@@ -384,10 +448,7 @@ BEGIN
   END IF;
 END$$;
 
--- Note: storage.objects RLS is already enabled by Supabase. DO NOT run ALTER TABLE on it.
-
--- --- Policies for Public Tables ---
-
+-- Registrations Policies
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'registrations' AND policyname = 'registrations_insert_own') THEN
@@ -402,6 +463,7 @@ BEGIN
   END IF;
 END$$;
 
+-- Users Policies
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'users' AND policyname = 'users_select_own') THEN
@@ -416,9 +478,7 @@ BEGIN
   END IF;
 END$$;
 
--- --- Policies for System Tables (Storage) ---
--- We can ADD policies to storage.objects, but we cannot ALTER the table itself.
-
+-- Storage Policies
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'storage_objects_select') THEN
@@ -433,50 +493,7 @@ BEGIN
   END IF;
 END$$;
 
--- Ensure the bucket exists
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('user-uploads', 'user-uploads', true)
-ON CONFLICT (id) DO NOTHING;
-
--- =========================
--- 6) Custom Trigger Functions
--- =========================
-
-CREATE OR REPLACE FUNCTION public.room_messages_broadcast_trigger()
-RETURNS TRIGGER AS $$
-DECLARE
-  rec RECORD;
-BEGIN
-  rec := COALESCE(NEW, OLD);
-  
-  -- Uses Supabase internal realtime function to broadcast changes
-  PERFORM realtime.broadcast_changes(
-    'room:' || (rec.id)::text,
-    TG_OP,
-    TG_OP,
-    TG_TABLE_NAME,
-    TG_TABLE_SCHEMA,
-    NEW,
-    OLD
-  );
-  RETURN COALESCE(NEW, OLD);
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- =========================
--- 7) Hall of Fame Table
--- =========================
-CREATE TABLE IF NOT EXISTS public.hall_of_fame (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  image_url text NOT NULL,
-  student_name text,
-  description text,
-  created_at timestamptz DEFAULT now(),
-  is_active boolean DEFAULT true
-);
-
-ALTER TABLE IF EXISTS public.hall_of_fame ENABLE ROW LEVEL SECURITY;
-
+-- Hall of Fame Policies
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'hall_of_fame' AND policyname = 'hall_of_fame_select_all') THEN
@@ -505,23 +522,7 @@ BEGIN
   END IF;
 END$$;
 
--- =========================
--- 8) Community Photos Table
--- =========================
-CREATE TABLE IF NOT EXISTS public.community_photos (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  title text NOT NULL,
-  image_url text NOT NULL,
-  date text,
-  description text,
-  participants integer DEFAULT 0,
-  order_number integer DEFAULT 0,
-  is_active boolean DEFAULT true,
-  created_at timestamptz DEFAULT now()
-);
-
-ALTER TABLE IF EXISTS public.community_photos ENABLE ROW LEVEL SECURITY;
-
+-- Community Photos Policies
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'community_photos' AND policyname = 'community_photos_select_all') THEN
@@ -548,19 +549,9 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'community_photos' AND policyname = 'community_photos_delete_admin') THEN
     CREATE POLICY community_photos_delete_admin ON public.community_photos FOR DELETE TO authenticated USING (public.is_admin());
   END IF;
-END$$;-- =========================
--- 9) Feedback Table
--- =========================
-CREATE TABLE IF NOT EXISTS public.feedback (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id text REFERENCES public.users(uid),
-  message text NOT NULL,
-  created_at timestamptz DEFAULT now()
-);
+END$$;
 
-ALTER TABLE IF EXISTS public.feedback ENABLE ROW LEVEL SECURITY;
-
--- Allow users to insert their own feedback
+-- Feedback Policies
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'feedback' AND policyname = 'feedback_insert_own') THEN
@@ -568,7 +559,6 @@ BEGIN
   END IF;
 END$$;
 
--- Allow admins to view all feedback
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'feedback' AND policyname = 'feedback_select_admin') THEN
@@ -576,13 +566,37 @@ BEGIN
   END IF;
 END$$;
 
--- Allow users to view their own feedback (optional, but good for verification)
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'feedback' AND policyname = 'feedback_select_own') THEN
     CREATE POLICY feedback_select_own ON public.feedback FOR SELECT TO authenticated USING (user_id = auth.uid()::text);
   END IF;
 END$$;
--- Add last_feedback_at column to users table
-ALTER TABLE public.users 
-ADD COLUMN IF NOT EXISTS last_feedback_at timestamptz;
+
+-- User Solved Problems Policies
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'user_solved_problems' AND policyname = 'Users can insert their own solved problems') THEN
+    CREATE POLICY "Users can insert their own solved problems"
+    ON public.user_solved_problems
+    FOR INSERT
+    WITH CHECK (auth.uid()::text = user_id);
+  END IF;
+END$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'user_solved_problems' AND policyname = 'Users can view their own solved problems') THEN
+    CREATE POLICY "Users can view their own solved problems"
+    ON public.user_solved_problems
+    FOR SELECT
+    USING (auth.uid()::text = user_id);
+  END IF;
+END$$;
+
+-- ================================================================
+-- 9. Storage Buckets
+-- ================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('user-uploads', 'user-uploads', true)
+ON CONFLICT (id) DO NOTHING;

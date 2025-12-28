@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award } from 'lucide-react';
+import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown } from 'lucide-react';
 import { BACKEND_URL } from '../config';
 import LandingPopup from './LandingPopup';
 
@@ -72,38 +72,124 @@ const StatsSection = () => {
                     </div>
 
                     {/* Right: Top Colleges Chart */}
-                    <div className="bg-[#1E1919] p-8 rounded-2xl border border-gray-800">
-                        <h4 className="text-xl font-bold mb-6 flex items-center gap-2">
-                            <Code className="text-[#0061FE]" /> Top Active Colleges
-                        </h4>
-                        <div className="space-y-4">
-                            {loading ? (
-                                <div className="text-center text-gray-500 py-10">Loading stats...</div>
-                            ) : stats.topColleges.filter(c => c.name && c.name !== "Not specified").length > 0 ? (
-                                stats.topColleges
-                                    .filter(c => c.name && c.name !== "Not specified")
-                                    .map((college, index) => (
-                                        <div key={index} className="relative">
-                                            <div className="flex justify-between text-sm mb-1">
-                                                <span className="font-medium text-gray-300 truncate w-3/4">{college.name}</span>
-                                                <span className="text-[#0061FE] font-bold">{college.count}</span>
-                                            </div>
-                                            <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="col-span-2 md:col-span-1 h-full">
+                        <div className="bg-[#1E1919] p-8 rounded-2xl border border-gray-800 h-full flex flex-col relative overflow-hidden group">
+                            {/* Background Glow */}
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-[#0061FE]/10 rounded-full blur-[80px] -z-10 group-hover:bg-[#0061FE]/20 transition-colors duration-500"></div>
+
+                            <h4 className="text-2xl font-bold mb-8 flex items-center gap-3">
+                                <span className="bg-[#0061FE]/20 p-2 rounded-lg text-[#0061FE]">
+                                    <Crown size={24} />
+                                </span>
+                                Top Active Colleges
+                            </h4>
+
+                            <div className="flex-1 flex flex-col justify-center">
+                                {loading ? (
+                                    <div className="text-center text-gray-500 py-10 animate-pulse">Loading leaderboards...</div>
+                                ) : stats.topColleges.filter(c => c.name && c.name !== "Not specified").length > 0 ? (
+                                    <div className="space-y-8">
+                                        {/* Top 3 Podium - Only show if we have enough data, else fallback to list */}
+                                        {stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? (
+                                            <div className="flex items-end justify-center gap-4 mb-4 min-h-[180px]">
+                                                {/* 2nd Place */}
                                                 <motion.div
-                                                    initial={{ width: 0 }}
-                                                    whileInView={{ width: `${(college.count / stats.topColleges[0].count) * 100}%` }}
-                                                    transition={{ duration: 1, delay: index * 0.1 }}
-                                                    className="h-full bg-gradient-to-r from-[#0061FE] to-[#00C6F7] rounded-full"
-                                                />
+                                                    initial={{ opacity: 0, y: 50 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.2 }}
+                                                    className="flex flex-col items-center w-1/3"
+                                                >
+                                                    <div className="text-center mb-2">
+                                                        <span className="text-gray-300 font-bold block text-sm sm:text-base line-clamp-2 min-h-[2.5em] leading-tight">
+                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[1].name}
+                                                        </span>
+                                                        <span className="text-gray-500 text-xs font-mono mt-1 block">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[1].count} Students</span>
+                                                    </div>
+                                                    <div className="w-full bg-gradient-to-t from-gray-800 to-gray-600/50 rounded-t-lg relative border-t border-x border-gray-600 h-24 flex items-end justify-center pb-2">
+                                                        <span className="text-3xl font-black text-gray-400/20 absolute top-2">2</span>
+                                                        <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-black font-bold text-sm shadow-[0_0_15px_rgba(156,163,175,0.5)]">2</div>
+                                                    </div>
+                                                </motion.div>
+
+                                                {/* 1st Place */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 50 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.1 }}
+                                                    className="flex flex-col items-center w-1/3 -mt-4 z-10"
+                                                >
+                                                    <div className="text-center mb-2">
+                                                        <span className="text-yellow-400 font-bold block text-sm sm:text-lg line-clamp-2 min-h-[2.5em] leading-tight drop-shadow-[0_0_10px_rgba(250,204,21,0.3)]">
+                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[0].name}
+                                                        </span>
+                                                        <span className="text-yellow-500/80 text-xs font-mono mt-1 block font-bold">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[0].count} Students</span>
+                                                    </div>
+                                                    <div className="w-full bg-gradient-to-t from-yellow-900/40 to-yellow-600/40 rounded-t-lg relative border-t border-x border-yellow-500 h-32 flex items-end justify-center pb-4 overflow-hidden">
+                                                        <div className="absolute inset-0 bg-yellow-400/10 animate-pulse"></div>
+                                                        <span className="text-4xl font-black text-yellow-400/20 absolute top-2">1</span>
+                                                        <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center text-black font-bold text-lg shadow-[0_0_20px_rgba(250,204,21,0.6)] relative z-10">
+                                                            <Crown size={20} />
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+
+                                                {/* 3rd Place */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 50 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.3 }}
+                                                    className="flex flex-col items-center w-1/3"
+                                                >
+                                                    <div className="text-center mb-2">
+                                                        <span className="text-amber-700 font-bold block text-sm sm:text-base line-clamp-2 min-h-[2.5em] leading-tight">
+                                                            {stats.topColleges.filter(c => c.name && c.name !== "Not specified")[2].name}
+                                                        </span>
+                                                        <span className="text-gray-500 text-xs font-mono mt-1 block">{stats.topColleges.filter(c => c.name && c.name !== "Not specified")[2].count} Students</span>
+                                                    </div>
+                                                    <div className="w-full bg-gradient-to-t from-amber-900/40 to-amber-700/40 rounded-t-lg relative border-t border-x border-amber-800 h-20 flex items-end justify-center pb-2">
+                                                        <span className="text-3xl font-black text-amber-800/20 absolute top-2">3</span>
+                                                        <div className="w-8 h-8 rounded-full bg-amber-700 flex items-center justify-center text-white font-bold text-sm shadow-[0_0_15px_rgba(180,83,9,0.5)]">3</div>
+                                                    </div>
+                                                </motion.div>
                                             </div>
+                                        ) : null}
+
+                                        {/* Remaining List (4th and 5th) */}
+                                        <div className="space-y-3 mt-4">
+                                            {stats.topColleges
+                                                .filter(c => c.name && c.name !== "Not specified")
+                                                .slice(stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? 3 : 0, 5) // Skip top 3 if we showed podium, else show all
+                                                .map((college, index) => {
+                                                    const actualIndex = stats.topColleges.filter(c => c.name && c.name !== "Not specified").length >= 3 ? index + 3 : index;
+                                                    return (
+                                                        <motion.div
+                                                            key={index}
+                                                            initial={{ opacity: 0, x: -20 }}
+                                                            whileInView={{ opacity: 1, x: 0 }}
+                                                            transition={{ delay: 0.4 + (index * 0.1) }}
+                                                            className="flex items-center gap-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
+                                                        >
+                                                            <div className="w-8 h-8 rounded-full bg-[#1E1919] border border-gray-700 flex items-center justify-center text-gray-400 font-bold text-sm">
+                                                                {actualIndex + 1}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h5 className="font-medium text-gray-200 truncate">{college.name}</h5>
+                                                            </div>
+                                                            <div className="px-3 py-1 rounded-full bg-[#0061FE]/10 text-[#0061FE] text-xs font-bold">
+                                                                {college.count}
+                                                            </div>
+                                                        </motion.div>
+                                                    );
+                                                })}
                                         </div>
-                                    ))
-                            ) : (
-                                <div className="text-center text-gray-500 py-10">
-                                    <p>Stats currently unavailable</p>
-                                    <p className="text-xs mt-2">Backend: {BACKEND_URL}</p>
-                                </div>
-                            )}
+                                    </div>
+                                ) : (
+                                    <div className="text-center text-gray-500 py-10">
+                                        <p>Stats currently unavailable</p>
+                                        <p className="text-xs mt-2 opacity-50">Backend: {BACKEND_URL}</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -145,8 +231,8 @@ const CodeSapiensHero = () => {
             title: "Meetups",
             description: "Offline events and mini-hackathons where you build and launch projects in minutes. Connect with like-minded peers.",
             content: (
-                <div className="h-full w-full bg-[#0061FE] flex items-center justify-center text-white p-0">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1765446924/Gemini_Generated_Image_g1g8reg1g8reg1g8_aqqe3e.png" alt="Meetups" className="w-full h-full object-cover" />
+                <div className="w-full">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740834/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye.jpg" alt="Meetups" className="w-full h-auto object-cover" />
                 </div>
             )
         },
@@ -154,8 +240,8 @@ const CodeSapiensHero = () => {
             title: "Hackathons",
             description: "Fun, minimal hackathons to get hands-on experience and win prizes. Push your limits and build something amazing.",
             content: (
-                <div className="h-full w-full bg-[#9B0032] flex items-center justify-center text-white p-0">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1765446926/Gemini_Generated_Image_7vm7h67vm7h67vm7_ixfxbu.png" alt="Hackathons" className="w-full h-full object-cover" />
+                <div className="w-full">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740764/width_800_pmtms3.webp" alt="Hackathons" className="w-full h-auto object-cover" />
                 </div>
             )
         },
@@ -163,17 +249,8 @@ const CodeSapiensHero = () => {
             title: "Nurturing Talent",
             description: "We help you discover your interests and build a unique profile that stands out. Mentorship from seniors and industry experts.",
             content: (
-                <div className="h-full w-full bg-[#FA5D00] flex items-center justify-center text-white p-0">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1765446901/Gemini_Generated_Image_j2rd2bj2rd2bj2rd_h2pygn.png" alt="Nurturing Talent" className="w-full h-full object-cover" />
-                </div>
-            )
-        },
-        {
-            title: "Curated Sessions",
-            description: "Practical skills, code examples, and presentations based on community feedback. Learn what matters.",
-            content: (
-                <div className="h-full w-full bg-purple-600 flex items-center justify-center text-white p-0">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1765446916/Gemini_Generated_Image_3or3oi3or3oi3or3_htqozy.png" alt="Curated Sessions" className="w-full h-full object-cover" />
+                <div className="w-full">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759741375/users_cme79i2lk00qls401ar5qxqnc_tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp25202025-08-10252015.15.02_25567a3d_c0frk5.jpg" alt="Nurturing Talent" className="w-full h-auto object-cover" />
                 </div>
             )
         }
@@ -269,33 +346,55 @@ const CodeSapiensHero = () => {
                 </motion.div>
 
                 <div className="container mx-auto px-6 relative z-10 pt-20">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="max-w-4xl"
-                    >
-                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
-                            CodeSapiens<span className="text-[#0061FE]">.</span>
-                        </h1>
-                        <p className="text-xl md:text-2xl text-gray-400 max-w-3xl leading-relaxed mb-12 font-light">
-                            The Biggest Student-Run Tech Community in TN.<br />
-                            <span className="text-white block mt-2">The only 'Inter-college students community' by the students for the students</span>
-                            <span className="text-gray-400 block mt-4 text-lg italic">
-                                We are here to help students build a career in Tech who say, <br />
-                                <span className="text-white not-italic">“Perusa Pannanum, but enna Pannanum Therla”</span> <br />
-                                ("Want to do something big, but don't know what to do").
-                            </span>
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-6">
-                            <button onClick={() => navigate('/auth')} className="bg-[#0061FE] text-white px-8 py-4 text-lg font-bold rounded-sm hover:bg-[#0050d6] transition-all flex items-center justify-center gap-3 group">
-                                Join Now <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-                            </button>
-                            <button onClick={() => document.getElementById('vision').scrollIntoView({ behavior: 'smooth' })} className="border border-gray-700 text-white px-8 py-4 text-lg font-medium rounded-sm hover:bg-white hover:text-black transition-all">
-                                Explore
-                            </button>
-                        </div>
-                    </motion.div>
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            className="max-w-4xl"
+                        >
+                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
+                                CodeSapiens<span className="text-[#0061FE]">.</span>
+                            </h1>
+                            <p className="text-xl md:text-2xl text-gray-400 max-w-2xl leading-relaxed mb-10 font-light">
+                                The Biggest Student-Run Tech Community in TN.<br />
+                                <span className="text-white block mt-2">The only 'Inter-college students community' by the students for the students</span>
+                                <span className="text-gray-400 block mt-4 text-lg italic">
+                                    We are here to help students build a career in Tech who say, <br />
+                                    <span className="text-white not-italic">“Perusa Pannanum, but enna Pannanum Therla”</span> <br />
+                                    ("Want to do something big, but don't know what to do").
+                                </span>
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-6">
+                                <button onClick={() => navigate('/auth')} className="bg-[#0061FE] text-white px-8 py-4 text-lg font-bold rounded-sm hover:bg-[#0050d6] transition-all flex items-center justify-center gap-3 group">
+                                    Join Now <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                </button>
+                                <button onClick={() => document.getElementById('vision').scrollIntoView({ behavior: 'smooth' })} className="border border-gray-700 text-white px-8 py-4 text-lg font-medium rounded-sm hover:bg-white hover:text-black transition-all">
+                                    Explore
+                                </button>
+                            </div>
+                        </motion.div>
+
+                        {/* Right: Dashboard Preview Image */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1, delay: 0.4 }}
+                            className="relative mt-12 lg:mt-0"
+                        >
+                            <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-800 group transition-transform duration-500">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-[#0061FE]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
+                                <img
+                                    src="https://res.cloudinary.com/dqudvximt/image/upload/v1766304825/preview-4_qcqokz.png"
+                                    alt="CodeSapiens Dashboard"
+                                    className="w-full h-auto object-cover"
+                                />
+                            </div>
+                            {/* Decorative Elements */}
+                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#0061FE] rounded-full blur-[80px] opacity-30"></div>
+                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#9B0032] rounded-full blur-[80px] opacity-30"></div>
+                        </motion.div>
+                    </div>
                 </div>
                 <motion.div
                     animate={{ y: [0, 10, 0] }}
@@ -334,7 +433,7 @@ const CodeSapiensHero = () => {
                             </div>
                         </div>
 
-                        <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden shadow-lg border border-gray-200">
+                        <div className="relative h-72 sm:h-80 md:h-96 w-full rounded-lg overflow-hidden shadow-lg border border-gray-200 mt-8 md:mt-0">
                             <video
                                 src="https://res.cloudinary.com/dqudvximt/video/upload/v1765443313/66c503d081b2f012369fc5d2_674798e5512046ff64125032_Collaboration_Top-Down_Table-transcode_jgafvj.mp4"
                                 autoPlay
@@ -346,7 +445,7 @@ const CodeSapiensHero = () => {
                         </div>
 
                         <div className="col-span-2 mt-12">
-                            <div className="space-y-20">
+                            <div className="space-y-16 md:space-y-24">
                                 {visionContent.map((item, index) => (
                                     <motion.div
                                         key={index}
@@ -354,13 +453,13 @@ const CodeSapiensHero = () => {
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.1 }}
-                                        className="flex flex-col md:flex-row gap-10 items-center"
+                                        className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 md:gap-12 items-center`}
                                     >
-                                        <div className="flex-1">
-                                            <h3 className="text-3xl font-bold mb-4 text-[#1E1919]">{item.title}</h3>
-                                            <p className="text-lg text-gray-600 leading-relaxed">{item.description}</p>
+                                        <div className="w-full md:w-2/5 text-center md:text-left">
+                                            <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 text-[#1E1919]">{item.title}</h3>
+                                            <p className="text-base md:text-lg text-gray-600 leading-relaxed">{item.description}</p>
                                         </div>
-                                        <div className="flex-1 h-64 w-full rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300">
+                                        <div className="w-full md:w-3/5 h-auto rounded-xl overflow-hidden shadow-xl transform hover:scale-[1.02] transition-transform duration-300">
                                             {item.content}
                                         </div>
                                     </motion.div>

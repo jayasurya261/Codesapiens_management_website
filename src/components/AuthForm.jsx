@@ -3,8 +3,10 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSession } from '@supabase/auth-helpers-react';
 
 export default function AuthForm() {
+  const session = useSession();
   const [mode, setMode] = useState('signIn'); // 'signIn', 'signUp', 'forgotPassword'
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -15,17 +17,12 @@ export default function AuthForm() {
   });
   const navigate = useNavigate();
 
-  // Listen to Supabase auth state
+  // Listen to session state for navigation
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
-        navigate('/');
-      }
-    });
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [navigate]);
+    if (session) {
+      navigate('/');
+    }
+  }, [session, navigate]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -73,7 +70,8 @@ export default function AuthForm() {
           password: formData.password,
         });
         if (error) throw error;
-        navigate('/');
+        if (error) throw error;
+        // navigate('/') handled by useEffect
       }
     } catch (err) {
       setMessage(`Error: ${err.message}`);

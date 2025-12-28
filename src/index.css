@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -8,6 +9,31 @@
     /* Dropbox Maroon/Red accent */
     --brand-yellow: #FA5D00;
     /* Dropbox Orange accent */
+}
+
+@layer base {
+
+    html,
+    body {
+        cursor: url('/pointer.png'), auto !important;
+        font-family: "Google Sans Flex", sans-serif;
+        font-optical-sizing: auto;
+        font-style: normal;
+        font-variation-settings:
+            "slnt" 0,
+            "wdth" 100,
+            "GRAD" 0,
+            "ROND" 0;
+    }
+
+    a,
+    button,
+    [role="button"],
+    input[type="submit"],
+    input[type="button"],
+    label {
+        cursor: url('/hover-pointer.png'), pointer !important;
+    }
 }
 
 @layer utilities {
@@ -63,4 +89,5 @@
         scrollbar-width: none;
     }
 }
+
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');

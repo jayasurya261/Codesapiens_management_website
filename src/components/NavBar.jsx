@@ -439,10 +439,12 @@ export default function NavBar() {
                   <BookPlus className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Resources</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/resume'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
-                  <FileCheck2 className="w-4 h-4 mr-3 flex-shrink-0" />
-                  <span>Resume Builder (Beta)</span>
+
+                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/resume-analyzer'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                  <BrainCircuit className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <span>Resume Analyze</span>
                 </button>
+
                 <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/mentorship'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
                   <BrainCircuit className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Mentorship</span>
@@ -459,10 +461,7 @@ export default function NavBar() {
                   <Users className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span>Meetups</span>
                 </button>
-                <button onClick={() => { setIsProfileDropdownOpen(false); navigate('/blogs'); }} className="w-full text-left flex items-center px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
-                  <BookOpen className="w-4 h-4 mr-3 flex-shrink-0" />
-                  <span>Blogs</span>
-                </button>
+
               </>
             )}
             <div className="border-t border-zinc-100 mt-2 pt-2">

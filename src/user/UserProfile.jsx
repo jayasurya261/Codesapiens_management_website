@@ -248,6 +248,7 @@ const UserProfile = () => {
             username: data.username || "",
             isPublic: data.is_public || false,
             attendedMeetups: data.attended_meetups || [],
+            points: data.points || 0,
           };
 
           setResumeUrl(transformedUser.resumeUrl);
@@ -973,8 +974,8 @@ const UserProfile = () => {
                 <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Skills</div>
               </div>
               <div>
-                <div className="text-3xl font-black text-white">0</div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Projects</div>
+                <div className="text-3xl font-black text-white">{userData.points}</div>
+                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Points</div>
               </div>
             </div>
 
