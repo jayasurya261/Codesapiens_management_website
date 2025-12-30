@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
 
 const LoadingContext = createContext({
-    isAppLoading: true,
+    isAppLoading: false,
     setIsAppLoading: () => { },
 });
 
 export const useAppLoading = () => useContext(LoadingContext);
 
 export const LoadingProvider = ({ children }) => {
-    const [isAppLoading, setIsAppLoading] = useState(true);
+    const [isAppLoading, setIsAppLoading] = useState(false);
 
     return (
         <LoadingContext.Provider value={{ isAppLoading, setIsAppLoading }}>

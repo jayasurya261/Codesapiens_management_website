@@ -13,7 +13,7 @@ import { Loader2 } from 'lucide-react';
 import PageTransition from './components/PageTransition';
 import AdminLayout from './components/AdminLayout';
 import { Toaster } from 'react-hot-toast';
-import LoadingScreen from './components/LoadingScreen';
+
 
 
 import Hero from './components/ui/Hero';
@@ -171,33 +171,9 @@ import { LoadingProvider, useAppLoading } from "./context/LoadingContext";
 
 // Root Component wrapped in LoadingProvider context consumer
 const RootWithLoading = () => {
-  const { isAppLoading, setIsAppLoading } = useAppLoading();
-
   return (
     <AnimatePresence mode="wait">
-      {isAppLoading && (
-        <LoadingScreen onComplete={() => setIsAppLoading(false)} />
-      )}
-
-      {/* iPhone Unlock Style Animation */}
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0, filter: "blur(10px)" }}
-        animate={{
-          scale: isAppLoading ? 0.9 : 1,
-          opacity: isAppLoading ? 0 : 1,
-          filter: isAppLoading ? "blur(10px)" : "blur(0px)"
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 200,
-          damping: 25,
-          delay: 0.2 // Small delay to sync with loading screen exit
-        }}
-        style={{ width: '100%', minHeight: '100vh' }}
-        key="main-content" // Ensure animation triggers
-      >
-        <Root />
-      </motion.div>
+      <Root />
     </AnimatePresence>
   );
 };
