@@ -9,26 +9,185 @@ import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- CUSTOM DOODLES & GRID ---
-const DrawVariant = {
-    hidden: { pathLength: 0, opacity: 0 },
-    visible: { pathLength: 1, opacity: 1, transition: { duration: 1.5, ease: "easeInOut" } }
-};
+// Doodles removed
 
-const FrameworkGrid = () => (
-    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden h-full">
-        <motion.div initial={{ height: 0 }} animate={{ height: "100%" }} transition={{ duration: 1.5, ease: "easeInOut" }} className="w-px bg-[#0061FE]/20 absolute left-[40px] hidden md:block" />
-        <motion.div initial={{ height: 0 }} animate={{ height: "100%" }} transition={{ duration: 1.5, delay: 0.2, ease: "easeInOut" }} className="w-px bg-[#0061FE]/20 absolute left-[260px] hidden md:block" />
-        <motion.div initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ duration: 1.5, delay: 0.1, ease: "easeInOut" }} className="absolute top-[180px] left-0 h-px bg-[#0061FE]/10" />
+
+// Background Animation Component - Memoized to prevent re-renders
+const AnalyzerBackground = React.memo(() => (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Vivid Layer - Falling Blocks (High Opacity) */}
+        <div className="absolute inset-0 opacity-100">
+            {/* Falling Orange Blocks ("Box Game" Style) */}
+            {[...Array(15)].map((_, i) => (
+                <motion.div
+                    key={`block-${i}`}
+                    className="absolute bg-[#FF3E00]"
+                    style={{
+                        width: i % 3 === 0 ? '12px' : '20px',
+                        height: i % 3 === 0 ? '12px' : '20px', // Square shapes
+                        left: `${5 + i * 7}%`,
+                        top: -50,
+                        opacity: 1, // Maximum brightness (fully opaque)
+                        boxShadow: '0 0 15px rgba(255, 62, 0, 0.8)' // Strong neon glow
+                    }}
+                    animate={{
+                        y: ['0vh', '110vh'],
+                        rotate: i % 2 === 0 ? [0, 180] : [0, -180]
+                    }}
+                    transition={{
+                        duration: 7 + Math.random() * 8, // Slightly faster for more energy
+                        repeat: Infinity,
+                        ease: "linear",
+                        delay: i * 0.5,
+                        repeatDelay: 0
+                    }}
+                />
+            ))}
+
+            {/* Small "Pixel" Chunks */}
+            {[...Array(10)].map((_, i) => (
+                <motion.div
+                    key={`pixel-${i}`}
+                    className="absolute bg-[#FF3E00]"
+                    style={{
+                        width: '8px',
+                        height: '8px',
+                        right: `${8 + i * 10}%`,
+                        top: -50,
+                        opacity: 1, // Maximum brightness
+                        boxShadow: '0 0 10px rgba(255, 62, 0, 0.6)'
+                    }}
+                    animate={{
+                        y: ['0vh', '110vh'],
+                    }}
+                    transition={{
+                        duration: 10 + Math.random() * 6,
+                        repeat: Infinity,
+                        ease: "linear",
+                        delay: i * 1.5,
+                    }}
+                />
+            ))}
+        </div>
+
+        {/* Subtle Layer - Icons & patterns (Low Opacity) */}
+        <div className="absolute inset-0 opacity-10">
+            {/* Floating Document Icon 1 */}
+            <motion.div
+                className="absolute top-1/4 left-[10%]"
+                animate={{
+                    y: [0, -20, 0],
+                    rotate: [0, 5, 0],
+                }}
+                transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                }}
+            >
+                <FileText className="w-24 h-24 text-[#1E1E1E]" />
+            </motion.div>
+
+            {/* Floating Search Icon */}
+            <motion.div
+                className="absolute top-[15%] right-[35%]"
+                animate={{
+                    y: [0, -15, 0],
+                    x: [0, 10, 0],
+                    rotate: [0, -5, 0],
+                }}
+                transition={{
+                    duration: 6,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 1
+                }}
+            >
+                <Search className="w-20 h-20 text-[#0061FE]/20" />
+            </motion.div>
+
+            {/* Floating Star Icon */}
+            <motion.div
+                className="absolute bottom-[20%] right-[10%]"
+                animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 15, 0],
+                }}
+                transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 2
+                }}
+            >
+                <Star className="w-16 h-16 text-[#FF5018]/20" />
+            </motion.div>
+
+            {/* Floating Zap Icon */}
+            <motion.div
+                className="absolute top-[60%] left-[5%]"
+                animate={{
+                    y: [0, 20, 0],
+                    opacity: [0.1, 0.3, 0.1],
+                }}
+                transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.5
+                }}
+            >
+                <Zap className="w-24 h-24 text-[#C2E812]/30" />
+            </motion.div>
+
+            {/* Floating Brain Icon */}
+            <motion.div
+                className="absolute top-1/3 right-[15%]"
+                animate={{
+                    y: [0, 30, 0],
+                    scale: [1, 1.1, 1],
+                }}
+                transition={{
+                    duration: 7,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                }}
+            >
+                <BrainCircuit className="w-32 h-32 text-[#0061FE]" />
+            </motion.div>
+
+            {/* Floating Document Icon 2 */}
+            <motion.div
+                className="absolute bottom-1/4 left-[20%]"
+                animate={{
+                    y: [0, 40, 0],
+                    rotate: [0, -10, 0],
+                }}
+                transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                }}
+            >
+                <FileText className="w-16 h-16 text-[#C2E812]" />
+            </motion.div>
+
+            {/* Connecting Lines / Tech Pattern */}
+            <svg className="absolute inset-0 w-full h-full opacity-30">
+                <motion.path
+                    d="M100,200 Q400,100 700,300 T1200,200"
+                    fill="none"
+                    stroke="#1E1E1E"
+                    strokeWidth="2"
+                    strokeDasharray="10 10"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 3, ease: "easeInOut" }}
+                />
+            </svg>
+        </div>
     </div>
-);
-
-const SquiggleArrow = () => (
-    <svg width="60" height="60" viewBox="0 0 60 60" fill="none" stroke="#C2E812" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <motion.path d="M10,50 Q30,10 50,30 T55,10" variants={DrawVariant} initial="hidden" animate="visible" />
-        <motion.path d="M45,5 L55,10 L50,20" variants={DrawVariant} initial="hidden" animate="visible" />
-    </svg>
-);
+));
 
 const ResumeAnalyzer = () => {
     const user = useUser();
@@ -229,70 +388,64 @@ const ResumeAnalyzer = () => {
         }
     };
 
+
+
+
+
     return (
-        <div className="min-h-screen bg-[#F7F5F2] font-sans text-[#1E1E1E] relative overflow-hidden">
-
-            {/* Grid Background */}
-            <FrameworkGrid />
-
-            {/* --- HERO SECTION --- */}
-            <div className="bg-[#1E1E1E] text-white pt-24 pb-48 px-6 relative overflow-hidden border-b border-[#0061FE]/20">
-                {/* Decorative Elements */}
-                <motion.div className="absolute top-12 left-[10%] z-20 opacity-50" animate={{ rotate: [-5, 5, -5] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}>
-                    <div className="w-16 h-16 border-4 border-[#C2E812] rounded-full"></div>
+        <div className="min-h-screen bg-[#F7F5F2] pt-24 pb-12 px-4 md:px-8 font-sans text-[#1E1E1E] relative overflow-hidden">
+            <AnalyzerBackground />
+            <div className="max-w-7xl mx-auto relative z-10">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center mb-12"
+                >
+                    <h1 className="text-4xl md:text-5xl font-black text-[#1E1E1E] mb-4">Resume Analyzer</h1>
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                        Optimize your CV with AI. Beat the ATS. Get hired.
+                    </p>
                 </motion.div>
 
-                <div className="w-full max-w-7xl mx-auto relative z-10">
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
-                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-6">
-                            RESUME <br />
-                            <span className="text-[#0061FE]">ANALYZER</span>
-                        </h1>
-                        <p className="text-xl md:text-2xl text-gray-400 max-w-2xl font-bold">
-                            Optimize your CV with AI. Beat the ATS. Get hired.
-                        </p>
-                    </motion.div>
-                </div>
-            </div>
-
-            {/* --- CONTENT CONTAINER --- */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-20 pb-24">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
 
                     {/* LEFT COLUMN: Controls */}
                     <div className="space-y-8">
-                        {/* Mode Toggle */}
-                        <div className="bg-white p-2 rounded-2xl border-[3px] border-[#1E1E1E] shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex">
-                            <button
-                                onClick={() => setAnalysisMode('jd')}
-                                className={`flex-1 py-3 text-sm font-black uppercase tracking-wider rounded-xl transition-all ${analysisMode === 'jd'
-                                    ? 'bg-[#1E1E1E] text-white shadow-md'
-                                    : 'text-gray-500 hover:text-[#1E1E1E] hover:bg-gray-100'
-                                    }`}
-                            >
-                                JD Match
-                            </button>
-                            <button
-                                onClick={() => setAnalysisMode('general')}
-                                className={`flex-1 py-3 text-sm font-black uppercase tracking-wider rounded-xl transition-all ${analysisMode === 'general'
-                                    ? 'bg-[#0061FE] text-white shadow-md'
-                                    : 'text-gray-500 hover:text-[#1E1E1E] hover:bg-gray-100'
-                                    }`}
-                            >
-                                General Review
-                            </button>
+                        {/* Mode Toggle - Apple Style */}
+                        <div className="bg-white p-1.5 rounded-2xl flex shadow-sm border border-gray-100 relative z-0">
+                            {[
+                                { id: 'jd', label: 'JD Match' },
+                                { id: 'general', label: 'General Review' }
+                            ].map((mode) => (
+                                <button
+                                    key={mode.id}
+                                    onClick={() => setAnalysisMode(mode.id)}
+                                    className={`flex-1 relative py-3 text-sm font-bold uppercase tracking-wider rounded-xl transition-colors duration-200 z-10 ${analysisMode === mode.id ? 'text-white' : 'text-gray-500 hover:text-[#1E1E1E]'
+                                        }`}
+                                >
+                                    {analysisMode === mode.id && (
+                                        <motion.div
+                                            layoutId="active-bubble"
+                                            className={`absolute inset-0 rounded-xl -z-10 shadow-md ${mode.id === 'jd' ? 'bg-[#1E1E1E]' : 'bg-[#0061FE]'
+                                                }`}
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    {mode.label}
+                                </button>
+                            ))}
                         </div>
 
                         {/* Upload Card */}
-                        <div className="bg-white p-8 rounded-[2rem] border-[3px] border-[#1E1E1E] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                        <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="p-3 bg-[#C2E812] rounded-xl border-2 border-black">
+                                <div className="p-3 bg-[#C2E812] rounded-xl">
                                     <Upload className="w-6 h-6 text-black" />
                                 </div>
-                                <h3 className="text-2xl font-black text-[#1E1E1E]">Upload Resume</h3>
+                                <h3 className="text-2xl font-bold text-[#1E1E1E]">Upload Resume</h3>
                             </div>
 
-                            <div className="border-[3px] border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-[#0061FE] hover:bg-blue-50/50 transition-all cursor-pointer relative group">
+                            <div className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#0061FE] hover:bg-blue-50/30 transition-all cursor-pointer relative group">
                                 <input
                                     type="file"
                                     id="resume-upload"
@@ -304,7 +457,7 @@ const ResumeAnalyzer = () => {
                                     }}
                                 />
                                 <label htmlFor="resume-upload" className="cursor-pointer flex flex-col items-center w-full h-full">
-                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 border-2 border-gray-100 group-hover:scale-110 transition-transform shadow-sm">
+                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 border border-gray-100 group-hover:scale-110 transition-transform shadow-sm">
                                         <FileText className="w-8 h-8 text-[#0061FE]" />
                                     </div>
                                     <span className="text-lg font-bold text-[#1E1E1E] mb-1">Click to upload PDF or Image</span>
@@ -314,7 +467,7 @@ const ResumeAnalyzer = () => {
 
                             <div className="relative flex items-center justify-center my-6">
                                 <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t-2 border-dashed border-gray-200"></div>
+                                    <div className="w-full border-t border-gray-200"></div>
                                 </div>
                                 <span className="relative z-10 bg-white px-3 text-sm font-bold text-gray-400 uppercase tracking-widest">OR</span>
                             </div>
@@ -332,7 +485,7 @@ const ResumeAnalyzer = () => {
                                         toast.error("No resume found in profile");
                                     }
                                 }}
-                                className={`w-full py-4 rounded-xl border-[3px] font-black text-lg transition-all flex items-center justify-center gap-3 ${useProfileResume
+                                className={`w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3 border-2 ${useProfileResume
                                     ? 'border-[#0061FE] bg-blue-50 text-[#0061FE]'
                                     : 'border-[#1E1E1E] text-[#1E1E1E] hover:bg-gray-50'
                                     }`}
@@ -342,7 +495,7 @@ const ResumeAnalyzer = () => {
                             </button>
 
                             {resumeFile && !useProfileResume && (
-                                <div className="mt-4 flex items-center gap-3 text-sm font-bold text-green-700 bg-green-50 p-4 rounded-xl border-2 border-green-200">
+                                <div className="mt-4 flex items-center gap-3 text-sm font-bold text-green-700 bg-green-50 p-4 rounded-xl border border-green-200">
                                     <CheckCircle2 className="w-5 h-5" />
                                     <span className="truncate">{resumeFile.name}</span>
                                 </div>
@@ -356,16 +509,16 @@ const ResumeAnalyzer = () => {
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
                                     exit={{ opacity: 0, height: 0 }}
-                                    className="bg-white p-8 rounded-[2rem] border-[3px] border-[#1E1E1E] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+                                    className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100"
                                 >
                                     <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-3 bg-[#FF5018] rounded-xl border-2 border-black">
-                                            <Zap className="w-6 h-6 text-white" />
+                                        <div className="p-3 bg-[#FF5018] rounded-xl text-white">
+                                            <Zap className="w-6 h-6" />
                                         </div>
-                                        <h3 className="text-2xl font-black text-[#1E1E1E]">Job Description</h3>
+                                        <h3 className="text-2xl font-bold text-[#1E1E1E]">Job Description</h3>
                                     </div>
                                     <textarea
-                                        className="w-full h-64 p-6 border-[2px] border-gray-200 rounded-xl focus:border-[#0061FE] focus:ring-4 focus:ring-blue-500/10 text-base font-medium resize-none outline-none transition-all placeholder:text-gray-400 bg-gray-50"
+                                        className="w-full h-64 p-6 border-2 border-gray-100 rounded-xl focus:border-[#0061FE] focus:ring-4 focus:ring-blue-500/10 text-base font-medium resize-none outline-none transition-all placeholder:text-gray-400 bg-gray-50"
                                         placeholder="Paste the job description here to compare..."
                                         value={jobDescription}
                                         onChange={(e) => setJobDescription(e.target.value)}
@@ -378,7 +531,7 @@ const ResumeAnalyzer = () => {
                         <button
                             onClick={handleAnalyze}
                             disabled={loading}
-                            className={`w-full py-5 rounded-2xl text-white font-black text-xl shadow-[8px_8px_0px_0px_black] transition-all hover:-translate-y-1 hover:shadow-[10px_10px_0px_0px_black] active:translate-y-0 active:shadow-[4px_4px_0px_0px_black] border-[3px] border-black ${loading
+                            className={`w-full py-5 rounded-2xl text-white font-bold text-xl shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl active:translate-y-0 active:shadow-md ${loading
                                 ? 'bg-gray-400 cursor-not-allowed'
                                 : 'bg-[#1E1E1E] hover:bg-[#0061FE]'
                                 }`}
@@ -397,7 +550,7 @@ const ResumeAnalyzer = () => {
                         </button>
 
                         {error && (
-                            <div className="p-4 bg-red-100/50 text-red-600 rounded-xl border-2 border-red-200 font-bold flex items-center gap-3">
+                            <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-100 font-bold flex items-center gap-3">
                                 <AlertCircle className="w-6 h-6 flex-shrink-0" />
                                 <p>{error}</p>
                             </div>
@@ -410,25 +563,25 @@ const ResumeAnalyzer = () => {
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white rounded-[2rem] border-[3px] border-[#1E1E1E] shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] overflow-hidden sticky top-8"
+                                className="bg-white rounded-[2rem] shadow-2xl border border-gray-100 overflow-hidden sticky top-8"
                             >
                                 <div className="bg-[#1E1E1E] p-10 text-center text-white relative overflow-hidden">
                                     <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/graphy.png')]"></div>
-                                    <div className="inline-flex items-center justify-center w-40 h-40 rounded-full border-[6px] border-[#C2E812] bg-[#1E1E1E] mb-6 relative shadow-xl z-10">
+                                    <div className="inline-flex items-center justify-center w-40 h-40 rounded-full border-4 border-[#C2E812] bg-[#1E1E1E] mb-6 relative shadow-lg z-10">
                                         <span className="text-5xl font-black">{analysisResult.matchPercentage}%</span>
-                                        <span className={`absolute -bottom-4 px-4 py-1.5 rounded-lg text-[#1E1E1E] font-black tracking-widest text-xs border-2 border-black ${analysisMode === 'jd' ? 'bg-[#C2E812]' : 'bg-[#0061FE] text-white'
+                                        <span className={`absolute -bottom-4 px-4 py-1.5 rounded-lg text-[#1E1E1E] font-bold tracking-widest text-xs shadow-md ${analysisMode === 'jd' ? 'bg-[#C2E812]' : 'bg-[#0061FE] text-white'
                                             }`}>
                                             {analysisMode === 'jd' ? 'MATCH' : 'SCORE'}
                                         </span>
                                     </div>
-                                    <h2 className="text-3xl font-black mb-3 tracking-tight">Analysis Complete</h2>
+                                    <h2 className="text-3xl font-bold mb-3 tracking-tight">Analysis Complete</h2>
                                     <p className="text-gray-400 font-medium leading-relaxed max-w-lg mx-auto">{analysisResult.summary}</p>
                                 </div>
 
                                 <div className="p-8 space-y-8">
                                     {/* Strengths */}
-                                    <div className='p-6 bg-green-50 rounded-2xl border-2 border-green-100'>
-                                        <h3 className="text-xl font-black text-green-800 mb-4 flex items-center gap-2">
+                                    <div className='p-6 bg-green-50 rounded-2xl border border-green-100'>
+                                        <h3 className="text-xl font-bold text-green-800 mb-4 flex items-center gap-2">
                                             <CheckCircle2 className="w-6 h-6" />
                                             Key Strengths
                                         </h3>
@@ -438,8 +591,8 @@ const ResumeAnalyzer = () => {
                                     </div>
 
                                     {/* Weaknesses */}
-                                    <div className='p-6 bg-red-50 rounded-2xl border-2 border-red-100'>
-                                        <h3 className="text-xl font-black text-red-800 mb-4 flex items-center gap-2">
+                                    <div className='p-6 bg-red-50 rounded-2xl border border-red-100'>
+                                        <h3 className="text-xl font-bold text-red-800 mb-4 flex items-center gap-2">
                                             <AlertCircle className="w-6 h-6" />
                                             Areas for Improvement
                                         </h3>
@@ -449,8 +602,8 @@ const ResumeAnalyzer = () => {
                                     </div>
 
                                     {/* Action Plan */}
-                                    <div className='p-6 bg-blue-50 rounded-2xl border-2 border-blue-100'>
-                                        <h3 className="text-xl font-black text-blue-800 mb-4 flex items-center gap-2">
+                                    <div className='p-6 bg-blue-50 rounded-2xl border border-blue-100'>
+                                        <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2">
                                             <ArrowRight className="w-6 h-6" />
                                             Action Plan
                                         </h3>
@@ -461,15 +614,11 @@ const ResumeAnalyzer = () => {
                                 </div>
                             </motion.div>
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-center p-12 bg-white rounded-[2rem] border-[3px] border-dashed border-gray-300 min-h-[600px] opacity-70">
-                                <div className="absolute top-10 right-10 opacity-30">
-                                    <SquiggleArrow />
-                                </div>
-
-                                <div className="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mb-8 border-[3px] border-gray-200">
+                            <div className="h-full flex flex-col items-center justify-center text-center p-12 bg-white rounded-[2rem] border-2 border-dashed border-gray-200 min-h-[600px] opacity-70">
+                                <div className="w-32 h-32 bg-gray-50 rounded-full flex items-center justify-center mb-8 border border-gray-100">
                                     <BrainCircuit className="w-16 h-16 text-gray-300" />
                                 </div>
-                                <h3 className="text-3xl font-black text-[#1E1E1E] mb-4">Ready when you are</h3>
+                                <h3 className="text-3xl font-bold text-[#1E1E1E] mb-4">Ready when you are</h3>
                                 <p className="text-xl text-gray-500 max-w-sm font-medium">
                                     Upload your resume and get instant, AI-powered career feedback.
                                 </p>
@@ -478,7 +627,7 @@ const ResumeAnalyzer = () => {
                     </div>
                 </div>
             </div>
-            <Toaster position="bottom-right" toastOptions={{ style: { background: '#1E1E1E', color: '#fff', border: '2px solid #333' } }} />
+            <Toaster position="bottom-right" toastOptions={{ style: { background: '#1E1E1E', color: '#fff', border: '1px solid #333' } }} />
         </div>
     );
 };

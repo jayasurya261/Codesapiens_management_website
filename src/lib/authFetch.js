@@ -12,7 +12,9 @@ export async function authFetch(input, init = {}) {
   } = await supabase.auth.getSession();
 
   // 2️⃣ If a user is logged in, attach the token
-  const authHeaders = {};
+  const authHeaders = {
+    "x-client-source": "codesapiens-web",
+  };
   if (session?.access_token) {
     authHeaders["Authorization"] = `Bearer ${session.access_token}`;
   }

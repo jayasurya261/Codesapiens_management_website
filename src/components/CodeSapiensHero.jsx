@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ChevronDown, Menu, X, Github, Linkedin, Youtube, Users, Calendar, Code, Award, Crown } from 'lucide-react';
 import { BACKEND_URL } from '../config';
+import { authFetch } from '../lib/authFetch';
 import LandingPopup from './LandingPopup';
 
 // --- Stats Section ---
@@ -12,7 +13,7 @@ const StatsSection = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${BACKEND_URL}/api/public-stats`)
+        authFetch(`${BACKEND_URL}/api/public-stats`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -26,16 +27,49 @@ const StatsSection = () => {
     return (
         <section className="py-24 bg-[#101010] text-white relative overflow-hidden">
             {/* Background Elements */}
-            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#0061FE] rounded-full blur-[100px]"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#9B0032] rounded-full blur-[100px]"></div>
+            {/* Background Elements */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+                {/* Moving Blob 1 - Blue (Large) */}
+                <motion.div
+                    animate={{
+                        x: [0, 100, -100, 0],
+                        y: [0, -100, 100, 0],
+                        scale: [1, 1.2, 0.8, 1],
+                        opacity: [0.4, 0.7, 0.4]
+                    }}
+                    transition={{
+                        duration: 15,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut"
+                    }}
+                    className="absolute top-[-20%] left-[-10%] w-[900px] h-[900px] bg-[#0061FE] rounded-full blur-[150px] mix-blend-screen opacity-40"
+                />
+
+                {/* Moving Blob 2 - Violet (Large) */}
+                <motion.div
+                    animate={{
+                        x: [0, -150, 100, 0],
+                        y: [0, 100, -50, 0],
+                        scale: [1, 1.3, 0.9, 1],
+                        opacity: [0.3, 0.6, 0.3]
+                    }}
+                    transition={{
+                        duration: 20,
+                        delay: 2,
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        ease: "easeInOut"
+                    }}
+                    className="absolute bottom-[-20%] right-[-10%] w-[1000px] h-[1000px] bg-[#7F00FF] rounded-full blur-[160px] mix-blend-screen opacity-30"
+                />
             </div>
 
             <div className="container mx-auto px-4 md:px-6 relative z-10">
                 <div className="mb-16 text-center">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-sm mb-4 block">Impact</span>
-                    <h2 className="text-4xl md:text-6xl font-bold mb-6">By The Numbers</h2>
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Impact</span>
+                    <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">By The Numbers</h2>
+                    <p className="text-golden-1 text-gray-400 max-w-2xl mx-auto">
                         We are growing fast. Join the movement.
                     </p>
                 </div>
@@ -43,17 +77,20 @@ const StatsSection = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start md:items-center">
                     {/* Left: Big Numbers */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
+
                         <motion.div
                             initial={{ opacity: 0, scale: 0.5 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            className="bg-[#1E1919] p-3 md:p-8 rounded-2xl border border-gray-800 text-center"
+                            className="bg-black/40 backdrop-blur-3xl p-3 md:p-8 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
                         >
-                            <Users className="w-8 h-8 md:w-10 md:h-10 text-[#0061FE] mx-auto mb-4" />
-                            <h3 className="text-3xl md:text-5xl font-black text-white mb-2">
+                            {/* Specular Highlight */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+                            <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
                                 {stats.totalUsers > 0 ? stats.totalUsers : "1500+"}
                             </h3>
-                            <p className="text-gray-500 font-medium uppercase tracking-normal md:tracking-wider text-[10px] sm:text-xs">Total Members</p>
+                            <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Total Members</p>
                         </motion.div>
 
                         <motion.div
@@ -61,26 +98,25 @@ const StatsSection = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="bg-[#1E1919] p-3 md:p-8 rounded-2xl border border-gray-800 text-center"
+                            className="bg-black/40 backdrop-blur-3xl p-3 md:p-8 rounded-2xl border border-white/10 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] relative overflow-hidden group"
                         >
-                            <Award className="w-8 h-8 md:w-10 md:h-10 text-[#FA5D00] mx-auto mb-4" />
-                            <h3 className="text-3xl md:text-5xl font-black text-white mb-2">
+                            {/* Specular Highlight */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+                            <h3 className="text-golden-2 md:text-golden-3 font-black text-white mb-2 drop-shadow-lg">
                                 {stats.totalColleges > 0 ? stats.totalColleges : "50+"}
                             </h3>
-                            <p className="text-gray-500 font-medium uppercase tracking-normal md:tracking-wider text-[10px] sm:text-xs">Colleges Reached</p>
+                            <p className="text-gray-400 font-medium uppercase tracking-normal md:tracking-wider text-golden-1">Colleges Reached</p>
                         </motion.div>
                     </div>
 
                     {/* Right: Top Colleges Chart */}
                     <div className="col-span-1 h-full w-full overflow-hidden">
-                        <div className="bg-[#1E1919] p-8 rounded-2xl border border-gray-800 h-full flex flex-col relative overflow-hidden group">
-                            {/* Background Glow */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-[#0061FE]/10 rounded-full blur-[80px] -z-10 group-hover:bg-[#0061FE]/20 transition-colors duration-500"></div>
+                        <div className="bg-black/40 backdrop-blur-3xl p-8 rounded-2xl border border-white/10 h-full flex flex-col relative overflow-hidden group shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+                            {/* Specular Highlight */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
 
-                            <h4 className="text-2xl font-bold mb-8 flex items-center gap-3">
-                                <span className="bg-[#0061FE]/20 p-2 rounded-lg text-[#0061FE]">
-                                    <Crown size={24} />
-                                </span>
+                            <h4 className="text-golden-2 font-bold mb-8 flex items-center gap-3">
                                 Top Active Colleges
                             </h4>
 
@@ -229,28 +265,28 @@ const CodeSapiensHero = () => {
     const visionContent = [
         {
             title: "Meetups",
-            description: "Offline events and mini-hackathons where you build and launch projects in minutes. Connect with like-minded peers.",
+            description: <span className="text-gray-600">Offline events and mini-hackathons where you build and launch projects in minutes. <span className="bg-yellow-300 text-black px-1 rounded-sm">Connect with like-minded peers.</span></span>,
             content: (
-                <div className="w-full">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740834/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye.jpg" alt="Meetups" className="w-full h-auto object-cover" />
+                <div className="w-full flex justify-center">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740834/users_cme79i2lk00qls401ar5qxqnc_OadwAYSr5ySuegEn-IMG-20250914-WA0012_gvyeye.jpg" alt="Meetups" className="w-full max-w-md h-auto rounded-lg" />
                 </div>
             )
         },
         {
             title: "Hackathons",
-            description: "Fun, minimal hackathons to get hands-on experience and win prizes. Push your limits and build something amazing.",
+            description: <span className="text-gray-600">Fun, minimal hackathons to get hands-on experience and win prizes. Push your limits and <span className="bg-yellow-300 text-black px-1 rounded-sm">build something amazing.</span></span>,
             content: (
-                <div className="w-full">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740764/width_800_pmtms3.webp" alt="Hackathons" className="w-full h-auto object-cover" />
+                <div className="w-full flex justify-center">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759740764/width_800_pmtms3.webp" alt="Hackathons" className="w-full max-w-md h-auto rounded-lg" />
                 </div>
             )
         },
         {
             title: "Nurturing Talent",
-            description: "We help you discover your interests and build a unique profile that stands out. Mentorship from seniors and industry experts.",
+            description: <span className="text-gray-600">We help you discover your interests and build a unique profile that stands out. <span className="bg-yellow-300 text-black px-1 rounded-sm">Mentorship from seniors and industry experts.</span></span>,
             content: (
-                <div className="w-full">
-                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759741375/users_cme79i2lk00qls401ar5qxqnc_tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp25202025-08-10252015.15.02_25567a3d_c0frk5.jpg" alt="Nurturing Talent" className="w-full h-auto object-cover" />
+                <div className="w-full flex justify-center">
+                    <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1759741375/users_cme79i2lk00qls401ar5qxqnc_tYvYry0ll1qJY9Cr-sZlcWmpyKLCEVr3R-WhatsApp25202025-08-10252015.15.02_25567a3d_c0frk5.jpg" alt="Nurturing Talent" className="w-full max-w-md h-auto rounded-lg" />
                 </div>
             )
         }
@@ -278,7 +314,7 @@ const CodeSapiensHero = () => {
                         <img src="https://res.cloudinary.com/dqudvximt/image/upload/v1756797708/WhatsApp_Image_2025-09-02_at_12.45.18_b15791ea_rnlwrz.jpg" alt="CodeSapiens Logo" className="w-10 h-10 rounded-full object-cover" />
                         <span className="text-xl font-bold tracking-tight">CodeSapiens</span>
                     </div>
-                    <div className="hidden md:flex items-center gap-8 font-medium text-sm">
+                    <div className="hidden md:flex items-center gap-8 font-medium text-golden-1">
                         <a href="#vision" className="hover:text-[#0061FE] transition-colors">Vision</a>
                         <a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a>
                         <a href="#community" className="hover:text-[#0061FE] transition-colors">Community</a>
@@ -296,7 +332,7 @@ const CodeSapiensHero = () => {
             {/* Mobile Menu */}
             {isMenuOpen && (
                 <div className="fixed inset-0 z-40 bg-[#101010] text-white pt-24 px-6 md:hidden">
-                    <div className="flex flex-col gap-6 text-2xl font-bold">
+                    <div className="flex flex-col gap-6 text-golden-2 font-bold">
                         <a href="#vision" onClick={() => setIsMenuOpen(false)}>Vision</a>
                         <a href="#events" onClick={() => setIsMenuOpen(false)}>Events</a>
                         <a href="#community" onClick={() => setIsMenuOpen(false)}>Community</a>
@@ -353,25 +389,23 @@ const CodeSapiensHero = () => {
                             transition={{ duration: 0.8, delay: 0.2 }}
                             className="max-w-4xl"
                         >
-                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
+                            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1] tracking-tighter mb-8 font-archivo-black">
                                 CodeSapiens<span className="text-[#0061FE]">.</span>
                             </h1>
-                            <p className="text-xl md:text-2xl text-gray-400 max-w-2xl leading-relaxed mb-10 font-light">
+                            <p className="text-golden-1 text-gray-400 max-w-2xl leading-relaxed mb-10 font-light">
                                 The Biggest Student-Run Tech Community in TN.<br />
                                 <span className="text-white block mt-2">The only 'Inter-college students community' by the students for the students</span>
-                                <span className="text-gray-400 block mt-4 text-lg italic">
+                                <span className="text-gray-400 block mt-4 text-golden-1 italic">
                                     We are here to help students build a career in Tech who say, <br />
                                     <span className="text-white not-italic">“Perusa Pannanum, but enna Pannanum Therla”</span> <br />
                                     ("Want to do something big, but don't know what to do").
                                 </span>
                             </p>
                             <div className="flex flex-col sm:flex-row gap-6">
-                                <button onClick={() => navigate('/auth')} className="bg-[#0061FE] text-white px-8 py-4 text-lg font-bold rounded-sm hover:bg-[#0050d6] transition-all flex items-center justify-center gap-3 group">
+                                <button onClick={() => navigate('/auth')} className="bg-[#0061FE] text-white px-8 py-4 text-golden-1 font-bold rounded-sm hover:bg-[#0050d6] transition-all flex items-center justify-center gap-3 group">
                                     Join Now <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                                 </button>
-                                <button onClick={() => document.getElementById('vision').scrollIntoView({ behavior: 'smooth' })} className="border border-gray-700 text-white px-8 py-4 text-lg font-medium rounded-sm hover:bg-white hover:text-black transition-all">
-                                    Explore
-                                </button>
+
                             </div>
                         </motion.div>
 
@@ -393,6 +427,9 @@ const CodeSapiensHero = () => {
                             {/* Decorative Elements */}
                             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#0061FE] rounded-full blur-[80px] opacity-30"></div>
                             <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#9B0032] rounded-full blur-[80px] opacity-30"></div>
+
+                            {/* Badge Text */}
+                            <p className="text-gray-400 text-golden-1 italic text-right mt-4">Designed and built by students, for students.</p>
                         </motion.div>
                     </div>
                 </div>
@@ -408,27 +445,26 @@ const CodeSapiensHero = () => {
 
 
             {/* Vision Section */}
-            <section id="vision" className="bg-[#F7F5F2] text-[#1E1919] py-24 md:py-32 relative">
+            <section id="vision" className="bg-[#F7F5F2] text-[#1E1919] py-12 md:py-16 relative">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 h-32 w-px bg-gradient-to-b from-[#101010] to-[#0061FE]"></div>
                 <div className="container mx-auto px-6">
                     <div className="grid md:grid-cols-2 gap-16 items-start">
                         <div className="relative md:sticky md:top-32">
-                            <span className="text-[#0061FE] font-bold tracking-widest uppercase text-sm mb-4 block">Our Vision</span>
-                            <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">
-                                Not just a club.<br />
-                                A <span className="text-[#0061FE]">launchpad</span>.
+                            <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Our Vision</span>
+                            <h2 className="text-golden-2 md:text-golden-3 font-bold mb-8 leading-tight">
+                                <span className="text-[#FF5018]">Non-profit</span> community built by <span className="text-[#0061FE]">students</span>, for <span className="text-[#0061FE]">students</span>.
                             </h2>
-                            <p className="text-lg md:text-xl text-gray-600 leading-relaxed mb-8">
+                            <p className="text-golden-1 text-gray-600 leading-relaxed mb-8">
                                 Our vision is to bring students together to collaborate, share, and grow. We envision a platform managed by students, for students, where you can build your career based on your interests.
                             </p>
                             <div className="grid grid-cols-2 gap-8 border-t border-gray-200 pt-8">
                                 <div>
-                                    <h3 className="text-4xl font-bold text-[#1E1919] mb-2">1500+</h3>
-                                    <p className="text-sm text-gray-500 uppercase tracking-widest">Active Members</p>
+                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">1500+</h3>
+                                    <p className="text-golden-1 text-gray-500 uppercase tracking-widest">Active Members</p>
                                 </div>
                                 <div>
-                                    <h3 className="text-4xl font-bold text-[#1E1919] mb-2">50+</h3>
-                                    <p className="text-sm text-gray-500 uppercase tracking-widest">Events Hosted</p>
+                                    <h3 className="text-golden-3 font-bold text-[#FF0000] mb-2">15+</h3>
+                                    <p className="text-golden-1 text-gray-500 uppercase tracking-widest">Events Hosted</p>
                                 </div>
                             </div>
                         </div>
@@ -444,8 +480,8 @@ const CodeSapiensHero = () => {
                             />
                         </div>
 
-                        <div className="col-span-2 mt-12">
-                            <div className="space-y-16 md:space-y-24">
+                        <div className="col-span-2 mt-4">
+                            <div className="space-y-8 md:space-y-16">
                                 {visionContent.map((item, index) => (
                                     <motion.div
                                         key={index}
@@ -456,10 +492,10 @@ const CodeSapiensHero = () => {
                                         className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 md:gap-12 items-center`}
                                     >
                                         <div className="w-full md:w-2/5 text-center md:text-left">
-                                            <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4 text-[#1E1919]">{item.title}</h3>
-                                            <p className="text-base md:text-lg text-gray-600 leading-relaxed">{item.description}</p>
+                                            <h3 className="text-golden-2 font-bold mb-3 md:mb-4 text-[#1E1919]">{item.title}</h3>
+                                            <p className="text-golden-1 text-gray-600 leading-relaxed">{item.description}</p>
                                         </div>
-                                        <div className="w-full md:w-3/5 h-auto rounded-xl overflow-hidden shadow-xl transform hover:scale-[1.02] transition-transform duration-300">
+                                        <div className="w-full md:w-3/5 h-auto flex items-center justify-center">
                                             {item.content}
                                         </div>
                                     </motion.div>
@@ -478,13 +514,11 @@ const CodeSapiensHero = () => {
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
                         <div>
-                            <span className="text-[#0061FE] font-bold tracking-widest uppercase text-sm mb-4 block">Events</span>
-                            <h2 className="text-4xl md:text-6xl font-bold text-white mb-4">What's Happening</h2>
-                            <p className="text-xl text-gray-400">Join us at our upcoming events.</p>
+                            <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Events</span>
+                            <h2 className="text-golden-2 md:text-golden-3 font-bold text-white mb-4">What's Happening</h2>
+                            <p className="text-golden-1 text-gray-400">Join us at our upcoming events.</p>
                         </div>
-                        <button className="hidden md:flex items-center gap-2 text-[#0061FE] font-medium hover:gap-3 transition-all mt-6 md:mt-0">
-                            View all events <ArrowRight size={20} />
-                        </button>
+
                     </div>
 
                     {/* Luma Embed */}
@@ -503,7 +537,7 @@ const CodeSapiensHero = () => {
 
                     {/* Past Events Gallery */}
                     <div className="flex items-center justify-between mb-12">
-                        <h3 className="text-3xl font-bold">Community Moments</h3>
+                        <h3 className="text-golden-2 font-bold">Community Moments</h3>
                         <div className="flex gap-2">
                             <button className="p-2 rounded-full border border-gray-700 hover:bg-white hover:text-black transition-colors"><ArrowRight className="rotate-180" /></button>
                             <button className="p-2 rounded-full border border-gray-700 hover:bg-white hover:text-black transition-colors"><ArrowRight /></button>
@@ -539,8 +573,8 @@ const CodeSapiensHero = () => {
 
                                     {/* Info - Handwritten Font Style */}
                                     <div className="text-[#1E1919] relative z-10 text-center">
-                                        <p className="font-bold text-xl mb-1 text-gray-800" style={{ fontFamily: 'Georgia, serif' }}>{photo.title}</p>
-                                        <p className="text-sm text-gray-500 font-medium italic">{photo.description || photo.date}</p>
+                                        <p className="font-bold text-golden-1 mb-1 text-gray-800" style={{ fontFamily: 'Georgia, serif' }}>{photo.title}</p>
+                                        <p className="text-golden-1 text-gray-500 font-medium italic">{photo.description || photo.date}</p>
                                     </div>
                                 </div>
                             </motion.div>
@@ -554,8 +588,8 @@ const CodeSapiensHero = () => {
                 <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
                 <div className="container mx-auto px-6 relative z-10">
                     <div className="text-center mb-20">
-                        <h2 className="text-5xl md:text-7xl font-bold mb-6">Hall of Fame</h2>
-                        <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto">Celebrating the outstanding achievements of our community members.</p>
+                        <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">Hall of Fame</h2>
+                        <p className="text-golden-1 text-white/80 max-w-3xl mx-auto">Celebrating the outstanding achievements of our community members.</p>
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-10">
@@ -571,9 +605,9 @@ const CodeSapiensHero = () => {
                                     <img src={entry.image_url} alt={entry.student_name} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="px-6 pb-8 text-center">
-                                    <h3 className="text-2xl font-bold mb-2">{entry.student_name}</h3>
+                                    <h3 className="text-golden-2 font-bold mb-2">{entry.student_name}</h3>
                                     <div className="w-12 h-1 bg-[#0061FE] mx-auto mb-4"></div>
-                                    <p className="text-gray-600 text-sm italic leading-relaxed">"{entry.description}"</p>
+                                    <p className="text-gray-600 text-golden-1 italic leading-relaxed">"{entry.description}"</p>
                                 </div>
                             </motion.div>
                         ))}
@@ -584,9 +618,9 @@ const CodeSapiensHero = () => {
             {/* Team / Mafia Gang */}
             <section id="community" className="py-24 md:py-32 bg-[#F7F5F2] text-[#1E1919]">
                 <div className="container mx-auto px-6 text-center">
-                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-sm mb-4 block">Community</span>
-                    <h2 className="text-4xl md:text-6xl font-bold mb-6">The Mafia Gang</h2>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-20">
+                    <span className="text-[#0061FE] font-bold tracking-widest uppercase text-golden-1 mb-4 block">Community</span>
+                    <h2 className="text-golden-2 md:text-golden-3 font-bold mb-6">The Mafia Gang</h2>
+                    <p className="text-golden-1 text-gray-600 max-w-2xl mx-auto mb-20">
                         Meet the core members who run the community. We are students, just like you.
                     </p>
 
@@ -596,8 +630,8 @@ const CodeSapiensHero = () => {
                             <div className="w-40 h-40 rounded-full overflow-hidden mb-6 border-4 border-[#FA5D00] shadow-lg group-hover:scale-105 transition-transform">
                                 <img src="https://res.cloudinary.com/druvxcll9/image/upload/v1761122517/1679197646322_n1svjq_s5w42a.jpg" alt="Thiyaga B" className="w-full h-full object-cover" />
                             </div>
-                            <h3 className="font-bold text-xl mb-1">Thiyaga B</h3>
-                            <p className="text-[#FA5D00] text-sm font-bold uppercase tracking-widest mb-3">Founder</p>
+                            <h3 className="font-bold text-golden-2 mb-1">Thiyaga B</h3>
+                            <p className="text-[#FA5D00] text-golden-1 font-bold uppercase tracking-widest mb-3">Founder</p>
                             <a href="https://www.linkedin.com/in/thiyagab/" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors"><Linkedin size={20} /></a>
                         </div>
                         {volunteers.map((vol, i) => (
@@ -611,7 +645,7 @@ const CodeSapiensHero = () => {
                                 <div className="w-32 h-32 rounded-full overflow-hidden mb-5 grayscale group-hover:grayscale-0 transition-all duration-500 border-2 border-transparent group-hover:border-[#0061FE] shadow-md">
                                     <img src={vol.photo} alt={vol.name} className="w-full h-full object-cover" />
                                 </div>
-                                <h3 className="font-bold text-lg mb-1">{vol.name}</h3>
+                                <h3 className="font-bold text-golden-1 mb-1">{vol.name}</h3>
                                 {vol.link && (
                                     <a href={vol.link} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0061FE] transition-colors mt-2">
                                         <Linkedin size={18} />
@@ -626,7 +660,7 @@ const CodeSapiensHero = () => {
             {/* Tagline Section */}
             <section className="py-20 bg-black flex items-center justify-center">
                 <div className="container mx-auto px-6 text-center">
-                    <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter uppercase leading-none">
+                    <h2 className="text-golden-2 md:text-golden-3 font-black text-white tracking-tighter uppercase leading-none">
                         Building Community <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0061FE] to-[#00C6F7]">Since 2023</span>
                     </h2>
@@ -655,7 +689,7 @@ const CodeSapiensHero = () => {
                         <div className="grid grid-cols-1 gap-16">
                             <div>
                                 <h4 className="text-white font-bold mb-6">Community</h4>
-                                <ul className="space-y-4 text-sm">
+                                <ul className="space-y-4 text-golden-1">
                                     <li><a href="#vision" className="hover:text-[#0061FE] transition-colors">About Us</a></li>
                                     <li><a href="#events" className="hover:text-[#0061FE] transition-colors">Events</a></li>
                                     <li><a href="#community" className="hover:text-[#0061FE] transition-colors">Team</a></li>
@@ -664,7 +698,7 @@ const CodeSapiensHero = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="mt-16 pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600">
+                    <div className="mt-16 pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center text-golden-1 text-gray-600">
                         <p>© 2025 CodeSapiens Community. All rights reserved.</p>
                         <p>Designed & Built by Students.</p>
                     </div>
